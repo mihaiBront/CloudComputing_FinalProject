@@ -1,7 +1,8 @@
 #!/bin/bash
-
+echo off
 # Name of the directory to check
 VENV_DIR="./.venv" # Replace 'venv' with your specific virtual environment folder name if different.
+PYTHON_VERSION=""
 
 # Check if the virtual environment exists
 if [ -d "$VENV_DIR" ] && [ -f "$VENV_DIR/pyvenv.cfg" ]; then
@@ -13,9 +14,12 @@ else
 fi
 
 # Install necessary dependencies
-source .venv/bin/activate
-pip install -U pip
-pip install -r requirements.txt
-
+if [ -d "$VENV_DIR" ] && [ -f "$VENV_DIR/pyvenv.cfg" ]; then
+    source .venv/bin/activate
+    pip install -U pip
+    pip install -r requirements.txt
+    echo "All requirements satisfied"
+else
+    echo "failed creating venv..."
+fi
 # Program end
-echo "All requirements satisfied"
