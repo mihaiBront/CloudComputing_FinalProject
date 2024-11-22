@@ -6,7 +6,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Flask",
+            "name": "Flask Debug",
             "type": "debugpy",
             "request": "launch",
             "module": "flask",
@@ -16,7 +16,6 @@
             },
             "args": [
                 "run",
-                "--no-debugger",
             ],
             "jinja": true,
             "justMyCode": true

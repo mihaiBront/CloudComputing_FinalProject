@@ -13,13 +13,14 @@ else
     echo 'Virtual environment created'
 fi
 
+echo "Activating the virtual environment..."
+. $VENV_DIR/bin/activate
+
 # Install necessary dependencies
-if [ -d "$VENV_DIR" ] && [ -f "$VENV_DIR/pyvenv.cfg" ]; then
-    source .venv/bin/activate
-    pip install -U pip
-    pip install -r requirements.txt
-    echo "All requirements satisfied"
+if [ -f "requirements.txt" ]; then
+  echo "Installing dependencies from requirements.txt..."
+  pip install -U pip
+  pip install -r requirements.txt
 else
-    echo "failed creating venv..."
+  echo "requirements.txt not found. Skipping installation."
 fi
-# Program end
