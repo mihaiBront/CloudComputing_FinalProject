@@ -6,6 +6,7 @@
         "ms-python.python",
         "ms-python.debugpy",
         "donjayamanne.python-environment-manager",
-        "ms-vscode-remote.remote-wsl"
+        "ms-vscode-remote.remote-wsl",
+        "donjayamanne.python-extension-pack"
     ]
 }
