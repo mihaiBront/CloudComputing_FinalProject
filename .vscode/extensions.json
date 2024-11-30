@@ -7,6 +7,7 @@
         "ms-python.debugpy",
         "donjayamanne.python-environment-manager",
         "ms-vscode-remote.remote-wsl",
-        "donjayamanne.python-extension-pack"
+        "donjayamanne.python-extension-pack",
+        "njpwerner.autodocstring"
     ]
 }
