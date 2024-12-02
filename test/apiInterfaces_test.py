@@ -10,14 +10,16 @@ class spoonacularApiTests(TestCase):
     spoon = spoonacularAPI_interface()
     
     def test_getListOfRecipesFromCorrectList(self):
+        self.spoon = spoonacularAPI_interface()
         code, response = self.spoon.getRecipiesFromIngredientsList(["milk", "cocoa"], 1)
         self.assertEqual(code, 200)
         self.assertIsInstance(response, list)
         self.assertIsInstance(response[0], dict)
         
     def test_getListOfRecipesFails_dueToInvalidApi(self):
+        self.spoon = spoonacularAPI_interface()
         self.spoon._API_KEY = "invalid"
-        code, response = self.spoon.getRecipiesFromIngredientsList(["milk 1glass", "cocoa 1spoon", "sacarine 1g"])
+        code, response = self.spoon.getRecipiesFromIngredientsList(["milk", "cocoa"], 1)
         self.assertNotEqual(code, 200) # code 401 non valid api key
         self.assertIsInstance(response, dict) # error
         
@@ -53,7 +55,7 @@ class edamamApiTests(TestCase):
     def test_gtetNutritionalTable_failsBadApi(self):
         self.edamam = edamamAPI_interface()
         
-        self.edamam._API_KEY = "invalid"
+        self.edamam._APP_ID = "invalid"
         code, response = self.edamam.gtetNutritionalTableFromIngredients(
             self.recipeName,
             self.ingr)
@@ -62,9 +64,13 @@ class edamamApiTests(TestCase):
     def test_gtetNutritionalTable_failsBadAppName(self):
         self.edamam = edamamAPI_interface()
         
-        self.edamam._APP_NAME = "invalid"
+        self.edamam._APP_ID = "invalid"
         code, response = self.edamam.gtetNutritionalTableFromIngredients(
             self.recipeName,
             self.ingr)
         self.assertNotEqual(code, 200) # code 401 non valid api key
         self.assertIsInstance(response, dict) # error
+        
+class spoonEdamamIntegrationTests(TestCase):
+    def test_getListOfRecipesFromCorrectList(self):
+        pass

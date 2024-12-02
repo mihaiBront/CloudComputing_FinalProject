@@ -9,35 +9,22 @@ class spoonacularAPI_interface(iAPI_interface):
         self._get_API_key_from_envLocal("SPOONACULAR_API_KEY")
         self.conn = http.client.HTTPSConnection("api.spoonacular.com")
     
-    def _variableToRequestUrlParam(self, value):
-        match(value):
-                case list():
-                    _ret = ",".join(value)
-                case _:
-                    _ret = value
-        return _ret
-    
-    def _apiRequest(self, endpoint:str, requestType:str, params:dict):
+    def _getRequestUrl(self, endpoint:str):
         # construct request URL
-        requestUrl: str = f"{endpoint}?apiKey={self._API_KEY}"
-        
-        for key, value in params.items():
-            requestUrl += \
-                f"{self.delimiter}{key}={self._variableToRequestUrlParam(value)}"
-        
-        payload = ''
-        headers = {}
-        self.conn.request(requestType, requestUrl, 
-                     payload, headers)
-        res = self.conn.getresponse()
-        data = res.read()
-        ret = data.decode("utf-8")
-        
-        return res.code, ret
+        return f"{endpoint}?apiKey={self._API_KEY}"
     
-    def getRecipiesFromIngredientsList(self, ingredients: list[str], nRecipes: int):
+    def getRecipiesFromIngredientsList(self, ingredients: list[str], nRecipes: int = 1):
+        """This method gets a list of n recipes from a list of ingredients
+
+        Args:
+            ingredients (list[str]): List of ingredients
+            nRecipes (int): Number of desired recipes
+
+        Returns:
+            tuple: Request code, returned data
+        """
         params:dict = {
-            "ingredients":ingredients,
+            "ingredients": ",".join(ingredients),
             "number":nRecipes
         }
         

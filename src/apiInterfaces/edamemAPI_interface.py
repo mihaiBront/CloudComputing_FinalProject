@@ -9,35 +9,23 @@ class edamamAPI_interface(iAPI_interface):
         self._get_API_key_from_envLocal("EDAMAM_APP_KEY")
         self._get_APPid_from_envLocal("EDAMAM_APP_ID")
         self.conn = http.client.HTTPSConnection("api.edamam.com")
-    
-    def _variableToRequestUrlParam(self, value):
-        match(value):
-                case list():
-                    _ret = ",".join(value)
-                case _:
-                    _ret = value
-        return _ret
-    
-    def _apiRequest(self, endpoint:str, method:str, params:dict = {}, body: dict|None = {}, headers: dict = {}):
+        
+    def _getRequestUrl(self, endpoint:str):
         # construct request URL
-        requestUrl: str = f"{endpoint}?app_id={self._APP_NAME}{self.delimiter}app_key={self._API_KEY}"
-        
-        for key, value in params.items():
-            requestUrl += \
-                f"{self.delimiter}{key}={self._variableToRequestUrlParam(value)}"
-        
-        _body = json.dumps(body)
-        
-        self.conn.request(method, requestUrl, 
-                            _body, headers)
-        
-        res = self.conn.getresponse()
-        data = res.read()
-        ret = data.decode("utf-8")
-        
-        return res.code, ret
-    
+        return f"{endpoint}?app_id={self._APP_ID}{self.delimiter}app_key={self._API_KEY}"
+            
     def gtetNutritionalTableFromIngredients(self, recipeName: str, ingredients: list[str], servings: str = ""):
+        """_summary_
+
+        Args:
+            recipeName (str): _description_
+            ingredients (list[str]): _description_
+            servings (str, optional): _description_. Defaults to "".
+
+        Returns:
+            _type_: _description_
+        """
+        
         body:dict = {
             "title": recipeName,
             "ingr": ingredients,
