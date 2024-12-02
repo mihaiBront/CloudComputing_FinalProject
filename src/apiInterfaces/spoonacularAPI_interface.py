@@ -1,11 +1,9 @@
 from src.apiInterfaces.iAPI_interface import iAPI_interface
 import json
-import requests
 import logging as log
 import http.client
 
 class spoonacularAPI_interface(iAPI_interface):
-    delimiter:str = "&"
     
     def __init__(self):
         self._get_API_key_from_envLocal("SPOONACULAR_API_KEY")
