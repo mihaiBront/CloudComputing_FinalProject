@@ -1,9 +1,8 @@
-from src.apiInterfaces.iAPI_interface import iAPI_interface
+from src.API_Interfaces.iAPI_interface import iAPI_interface
 import json
-import logging as log
 import http.client
 
-class edamamAPI_interface(iAPI_interface):
+class EdamamAPI_interface(iAPI_interface):
         
     def __init__(self):
         self._get_API_key_from_envLocal("EDAMAM_APP_KEY")
