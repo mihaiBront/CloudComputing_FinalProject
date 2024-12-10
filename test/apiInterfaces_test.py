@@ -82,6 +82,7 @@ class libreViewApiTests(TestCase):
         self.assertIsInstance(oauth_response, LibreViewOauthResponse)
         self.assertIsNotNone(oauth_response.AuthTiket)
         self.assertIsNotNone(oauth_response.User)
+        log.info(f"SUCCESS object serialized correctly")
     
     def test_oAuthRequest(self):
         jsonFilePath = ".test_resources/oauth_emailAndPassword.json"
