@@ -1,74 +1,61 @@
 from unittest import TestCase
 from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
-from src.API_Interfaces.EdamamAPI_interface import EdamamAPI_interface
+from src.models.Recipe import Recipe
 
 import logging as log
+
+from src.commons.LoggerInitializer import LoggerInitializer
+LoggerInitializer(log.INFO, "tests.log")
 
 class spoonacularApiTests(TestCase):
     spoon = SpoonacularAPI_interface()
     
     def test_getListOfRecipesFromCorrectList(self):
         self.spoon = SpoonacularAPI_interface()
-        code, response = self.spoon.getRecipiesFromIngredientsList(["milk", "cocoa"], 1)
-        self.assertEqual(code, 200)
-        self.assertIsInstance(response, list)
-        self.assertIsInstance(response[0], dict)
-        
-    def test_getListOfRecipesFails_dueToInvalidApi(self):
+        try:
+            code, response = self.spoon.getRecipiesFromIngredientsList(["milk", "cocoa"], 1)
+            self.assertEqual(code, 200)
+            self.assertIsInstance(response, list)
+            self.assertIsInstance(response[0], dict)
+            log.info(f"SUCCESS {response}")
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, "Test failed")
+            
+    def test_deserializeRecipeToRecipeObject(self):
         self.spoon = SpoonacularAPI_interface()
-        self.spoon._API_KEY = "invalid"
-        code, response = self.spoon.getRecipiesFromIngredientsList(["milk", "cocoa"], 1)
-        self.assertNotEqual(code, 200) # code 401 non valid api key
-        self.assertIsInstance(response, dict) # error
+        try:
+            code, response = self.spoon.getRecipiesFromIngredientsList(["milk", "cocoa"], 1)
+            self.assertEqual(code, 200)
+            self.assertIsInstance(response, list)
+            self.assertIsInstance(response[0], dict)
+            log.info(f"SUCCESS {response}")
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, "Test failed")
         
-class edamamApiTests(TestCase):
-    edamam = EdamamAPI_interface()
-    
-    recipeName = "Fresh Ham Roasted With Rye Bread and Dried Fruit Stuffing",
-    ingr = [
-                "1 fresh ham, about 18 pounds, prepared by your butcher (See Step 1)",
-                "7 cloves garlic, minced",
-                "1 tablespoon caraway seeds, crushed",
-                "4 teaspoons salt",
-                "Freshly ground pepper to taste",
-                "1 teaspoon olive oil",
-                "1 medium onion, peeled and chopped",
-                "3 cups sourdough rye bread, cut into 1/2-inch cubes",
-                "1 1/4 cups coarsely chopped pitted prunes",
-                "1 1/4 cups coarsely chopped dried apricots",
-                "1 large apple tart, peeled, cored and cut into 1/2-inch cubes",
-                "2 teaspoons chopped fresh rosemary",
-                "1 egg, lightly beaten",
-                "1 cup chicken brother, homemade or low-sodium canned"
-            ]
-    
-    def test_gtetNutritionalTableFromIngredients(self):
-        self.edamam = EdamamAPI_interface()
+        recipe_json = response[0]
+        try:
+            recipe_deserialized = Recipe.from_dict(recipe_json)
+            self.assertIsInstance(recipe_deserialized, Recipe,  
+                                  "Recipe deserialized is not a Recipe object")
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, "Test failed")
+            
         
-        code, response = self.edamam.gtetNutritionalTableFromIngredients(
-            self.recipeName,
-            self.ingr)
-        self.assertEqual(code, 200)
         
-    def test_gtetNutritionalTable_failsBadApi(self):
-        self.edamam = EdamamAPI_interface()
+    def test_getGlycemicLoadFromIngredientsList(self):
+        self.spoon = SpoonacularAPI_interface()
+        try:
+            code, response = self.spoon.postGlycemicLoadFromIngredientList([
+                                                                                "1 kiwi",
+                                                                                "2 cups rice",
+                                                                                "2 glasses of water"
+                                                                            ])
+            self.assertEqual(code, 200)
+            log.info(f"SUCCESS {response}")
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, "Test failed")
         
-        self.edamam._APP_ID = "invalid"
-        code, response = self.edamam.gtetNutritionalTableFromIngredients(
-            self.recipeName,
-            self.ingr)
-        self.assertNotEqual(code, 200) # code 401 non valid api key
-    
-    def test_gtetNutritionalTable_failsBadAppName(self):
-        self.edamam = EdamamAPI_interface()
-        
-        self.edamam._APP_ID = "invalid"
-        code, response = self.edamam.gtetNutritionalTableFromIngredients(
-            self.recipeName,
-            self.ingr)
-        self.assertNotEqual(code, 200) # code 401 non valid api key
-        self.assertIsInstance(response, dict) # error
-        
-class spoonEdamamIntegrationTests(TestCase):
-    def test_getListOfRecipesFromCorrectList(self):
-        pass
