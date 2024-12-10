@@ -1,11 +1,15 @@
 from unittest import TestCase
 from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
+from src.API_Interfaces.LibreViewAPI_interface import LibreViewOauthResponse
+from src.models.LibreViewOauthResponse import LibreViewOauthResponse
 from src.models.Recipe import Recipe
 
-import logging as log
+import os
 
+import logging as log
 from src.commons.LoggerInitializer import LoggerInitializer
 LoggerInitializer(log.INFO, "tests.log")
+
 
 class spoonacularApiTests(TestCase):
     spoon = SpoonacularAPI_interface()
@@ -59,3 +63,33 @@ class spoonacularApiTests(TestCase):
             log.error(e)
             self.assertFalse(True, "Test failed")
         
+
+class libreViewApiTests(TestCase):
+    def test_deserializeJsonOauth(self):
+        jsonFilePath = ".test_resources/oauth_librelink_response.json"
+        if not os.path.isfile(jsonFilePath):
+            log.warning(f"Test not applicable; {jsonFilePath} does not exist")
+            return
+        
+        # arrange: read json from files
+        with open(jsonFilePath, "r") as f:
+            oauth_json = f.read()
+        
+        # act: deserialize json
+        oauth_response: LibreViewOauthResponse = LibreViewOauthResponse.deserialize(oauth_json)
+        
+        # assert: check the object is filled
+        self.assertIsInstance(oauth_response, LibreViewOauthResponse)
+        self.assertIsNotNone(oauth_response.AuthTiket)
+        self.assertIsNotNone(oauth_response.User)
+    
+    def test_oAuthRequest(self):
+        jsonFilePath = ".test_resources/oauth_emailAndPassword.json"
+        if not os.path.isfile(jsonFilePath):
+            log.warning(f"Test not applicable; {jsonFilePath} does not exist")
+            return
+        else:
+            # pending implementation
+            return
+        
+            

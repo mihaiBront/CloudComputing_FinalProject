@@ -5,7 +5,7 @@ class LoggerInitializer(Serializable):
     def __init__(self, level=log.WARN, filepath = None):
         log.basicConfig(
             level=log.DEBUG,
-            format='%(asctime)s - %(levelname)s - %(message)s',
+            format='[%(asctime)s]\t%(levelname)s\t%(filename)s > %(funcName)s\t%(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
             filemode="a",
             filename=filepath
