@@ -6,12 +6,12 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class LibreViewOauthResponse(Serializable):
+class OauthResponse(Serializable):
     User: 'User' = field(default_factory='User')
     AuthTiket: 'AuthTicket' = field(default_factory='AuthTicket')
     
     @classmethod
-    def from_dict(cls, data: dict) -> 'LibreViewOauthResponse':
+    def from_dict(cls, data: dict) -> 'OauthResponse':
         return cls(
             User = User().from_dict(data['user']),
             AuthTiket = AuthTicket().from_dict(data['authTicket'])

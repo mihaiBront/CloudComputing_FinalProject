@@ -13,10 +13,10 @@ class Ingredient(Serializable):
         return f"{self.Amount} {self.Unit} {self.Name}"
     
     @classmethod
-    def from_dict(cls, json_data):
+    def from_dict(cls, json_data) -> 'Ingredient':
         return cls(
             SpoonIngredientID=json_data["id"],
-            Title=json_data["name"],
+            Name=json_data["name"],
             Amount=json_data["amount"],
             Unit=json_data["unit"],
             ImageURL=json_data["image"]

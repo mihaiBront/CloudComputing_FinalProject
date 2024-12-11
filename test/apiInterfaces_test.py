@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
 from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
-from src.models.LibreView.OauthResponse import LibreViewOauthResponse
+from src.models.LibreView.OauthResponse import OauthResponse
 from src.models.Spoonacular.Recipe import Recipe
 
 import os
@@ -69,41 +69,16 @@ class spoonacularApiTests(TestCase):
         
 
 class libreViewApiTests(TestCase):
-    def test_deserializeJsonOauth(self):
-        jsonFilePath = ".test_resources/oauth_librelink_response.json"
-        if not os.path.isfile(jsonFilePath):
-            log.warning(f"Test not applicable; {jsonFilePath} does not exist")
-            return
-        
-        # arrange: read json from files
-        with open(jsonFilePath, "r") as f:
-            oauth_json = f.read()
-        
-        # act: deserialize json
-        oauth_response: LibreViewOauthResponse = LibreViewOauthResponse.deserialize(oauth_json)
-        
-        # assert: check the object is filled
-        self.assertIsInstance(oauth_response, LibreViewOauthResponse)
-        self.assertIsNotNone(oauth_response.AuthTiket)
-        self.assertIsNotNone(oauth_response.User)
-        log.info(f"SUCCESS object serialized correctly")
-    
-    def test_setKey(self):
+    def testConstruct(self):
         libreApi = LibreViewAPI_interface()
-        key = "TEST_KEY"
-        val = "09aa2d232d1a48c09fa6f68635eae33c"
+        self.assertIsInstance(libreApi, LibreViewAPI_interface)
         
-        libreApi._setApiKey(key, val)
+        print(libreApi._PatientId)
+        print(libreApi._ACCOUNT_ID)
         
-        try: 
-            load_dotenv(".env.local")
-            val_stored = os.getenv(key)
-            print(f"{val_stored}|{val}")
-            self.assertEqual(val, val_stored)
-        except Exception as e:
-            log.error(e)
-            self.assertFalse(True, "Test failed")
-    
+        self.assertIsNotNone(libreApi._API_KEY)
+        self.assertIsNotNone(libreApi._PatientId)
+
     def test_oAuthRequest(self):
         jsonFilePath = ".test_resources/oauth_emailAndPassword.json"
         if not os.path.isfile(jsonFilePath):
@@ -122,12 +97,12 @@ class libreViewApiTests(TestCase):
         
         oAuth = LibreViewAPI_interface()
         
-        oAuth.requestToken(oauth_json["email"], oauth_json["password"])
+        oAuth.oAuth(oauth_json["email"], oauth_json["password"])
         self.assertIsNotNone(oAuth._API_KEY)
-        
-    def test_getUser(self):
-        oAuth = LibreViewAPI_interface()
-        
-        code = oAuth.getUser()
-        
-        self.assertEqual(code, 0)
+    
+    def test_getLastWeeksData(self):
+        libreApi = LibreViewAPI_interface()
+
+        code, data = libreApi.getLastWeekMeasurement(1,7)
+
+        print(f"Obtained code {code} ({data})")

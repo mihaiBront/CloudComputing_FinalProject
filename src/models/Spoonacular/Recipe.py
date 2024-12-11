@@ -13,10 +13,12 @@ class Recipe(Serializable):
    
    @staticmethod
    def from_dict(json_data):
+      allIngredients = json_data["usedIngredients"] + json_data["missedIngredients"]
+      
       return Recipe(
          SpoonRecipeID=json_data["id"],
          Title=json_data["title"],
-         Ingredients=[Ingredient.from_dict(ing) for ing in (json_data["usedIngredients"]+json_data["missedIngredients"])],
+         Ingredients=[Ingredient.from_dict(ing) for ing in (allIngredients)],
          Image=json_data["image"]
       )
    

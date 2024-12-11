@@ -34,3 +34,14 @@ class DataBase(object):
         #TODO: create glucose hystoric table
         
         return
+
+    def insertRecipe(self, recipe:Recipe):
+        self.Cursor.execute(recipe.insertSchema_database("recipes"))
+        self.Connection.commit()
+
+        return
+    
+    def getRecipesList(self):
+        self.Cursor.execute("SELECT * FROM recipes")
+        recipes = self.Cursor.fetchmany(20)
+        return recipes

@@ -17,6 +17,14 @@ class Serializable(object):
         log.error("This method is pending implementation")
         return None
     
+    def to_dict(self):
+        """This method converts the class to a dictionary
+
+        Returns:
+            dict: Dictionary representation of the class
+        """
+        return self.__dict__.copy()
+    
     @classmethod
     def deserialize(self, json_string: str):
         """This method constructs a class from a JSON string

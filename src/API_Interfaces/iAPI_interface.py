@@ -78,9 +78,16 @@ class iAPI_interface(object):
         
         requestUrl: str = self._getRequestUrl(endpoint)
         
+        if not("?" in requestUrl):
+            requestUrl += "?"
+        else:
+            requestUrl += self.delimiter
+        
         for key, value in params.items():
             requestUrl += \
-                f"{self.delimiter}{key}={self._variableToRequestUrlParam(value)}"
+                f"{key}={self._variableToRequestUrlParam(value)}{self.delimiter}"
+        
+        requestUrl = requestUrl[:-1]
         
         _body = json.dumps(body)
         
@@ -92,6 +99,22 @@ class iAPI_interface(object):
         ret = data.decode("utf-8")
         
         return res.code, ret
+    
+    def _get_envLocal(self, key):
+        """Gets the value of a key from your local environment file, which must be placed in a '.env.local' file in your root directory'
+
+        Args:
+            key (str): The key to be retrieved from the environment file.
+
+        Returns:
+            str: The value of the key.
+        """
+        try:
+            load_dotenv(dotenv_path='.env.local')
+            return os.getenv(key)
+        except Exception as ex:
+            log.error(f"Failed getting key from environment ({ex})")
+            return None
     
     def _get_APPid_from_envLocal(self, entryName: str):
         """Gets the APP name from your local environment file, which must
