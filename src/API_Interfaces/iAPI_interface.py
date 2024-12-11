@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 import os
 import http.client
 import json
@@ -28,6 +28,21 @@ class iAPI_interface(object):
                 case _:
                     _ret = value
         return _ret
+    
+    @staticmethod
+    def _setApiKey(key:str, value:str, env_path: str = ".env.local"):
+        """ This method sets the API key in the environment file.
+
+        Args:
+            key (str): The key to be set in the environment file.
+            value (str): The value of the key to be set.
+            env_path (str, optional): The path to the environment file. Defaults to ".env.local".
+        """
+        
+        load_dotenv(dotenv_path=env_path)
+        path = ".env.local"
+        set_key(path, key, value)
+        return
     
     def _getRequestUrl(self, endpoint):
         """ This method returns a request URL for a specific endpoint. Adding the necessary

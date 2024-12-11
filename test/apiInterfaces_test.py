@@ -1,15 +1,19 @@
 from unittest import TestCase
 from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
-from src.API_Interfaces.LibreViewAPI_interface import LibreViewOauthResponse
+from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
 from src.models.LibreViewOauthResponse import LibreViewOauthResponse
 from src.models.Recipe import Recipe
 
 import os
+from dotenv import load_dotenv
+import http
 
 import logging as log
 from src.commons.LoggerInitializer import LoggerInitializer
+import json
 LoggerInitializer(log.INFO, "tests.log")
 
+TEST_API_SENSITIVE = False
 
 class spoonacularApiTests(TestCase):
     spoon = SpoonacularAPI_interface()
@@ -84,13 +88,46 @@ class libreViewApiTests(TestCase):
         self.assertIsNotNone(oauth_response.User)
         log.info(f"SUCCESS object serialized correctly")
     
+    def test_setKey(self):
+        libreApi = LibreViewAPI_interface()
+        key = "TEST_KEY"
+        val = "09aa2d232d1a48c09fa6f68635eae33c"
+        
+        libreApi._setApiKey(key, val)
+        
+        try: 
+            load_dotenv(".env.local")
+            val_stored = os.getenv(key)
+            print(f"{val_stored}|{val}")
+            self.assertEqual(val, val_stored)
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, "Test failed")
+    
     def test_oAuthRequest(self):
         jsonFilePath = ".test_resources/oauth_emailAndPassword.json"
         if not os.path.isfile(jsonFilePath):
             log.warning(f"Test not applicable; {jsonFilePath} does not exist")
             return
-        else:
-            # pending implementation
+        
+        if not TEST_API_SENSITIVE:
+            log.warning(f"Test not applicable; TEST_API_SENSITIVE is False")
             return
         
-            
+        # arrange: read json from files
+        with open(jsonFilePath, "r") as f:
+            oauth_json = f.read()
+        
+        oauth_json = json.loads(oauth_json)
+        
+        oAuth = LibreViewAPI_interface()
+        
+        oAuth.requestToken(oauth_json["email"], oauth_json["password"])
+        self.assertIsNotNone(oAuth._API_KEY)
+        
+    def test_getUser(self):
+        oAuth = LibreViewAPI_interface()
+        
+        code = oAuth.getUser()
+        
+        self.assertEqual(code, 0)
