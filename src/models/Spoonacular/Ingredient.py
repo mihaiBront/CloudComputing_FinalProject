@@ -16,7 +16,7 @@ class Ingredient(Serializable):
     def from_dict(cls, json_data):
         return cls(
             SpoonIngredientID=json_data["id"],
-            Name=json_data["name"],
+            Title=json_data["name"],
             Amount=json_data["amount"],
             Unit=json_data["unit"],
             ImageURL=json_data["image"]

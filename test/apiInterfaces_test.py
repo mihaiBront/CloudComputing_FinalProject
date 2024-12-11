@@ -1,16 +1,16 @@
 from unittest import TestCase
+
 from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
 from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
-from src.models.LibreViewOauthResponse import LibreViewOauthResponse
-from src.models.Recipe import Recipe
+from src.models.LibreView.OauthResponse import LibreViewOauthResponse
+from src.models.Spoonacular.Recipe import Recipe
 
 import os
 from dotenv import load_dotenv
-import http
+import json
 
 import logging as log
 from src.commons.LoggerInitializer import LoggerInitializer
-import json
 LoggerInitializer(log.INFO, "tests.log")
 
 TEST_API_SENSITIVE = False

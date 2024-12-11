@@ -1,8 +1,7 @@
 from src.API_Interfaces.iAPI_interface import iAPI_interface
-from src.models.LibreViewOauthResponse import LibreViewOauthResponse, User
+from src.models.LibreView.OauthResponse import LibreViewOauthResponse, User
+
 import json
-import os
-from dotenv import set_key, load_dotenv
 import http.client
 import logging as log
 

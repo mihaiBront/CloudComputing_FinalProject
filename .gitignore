@@ -163,3 +163,4 @@ cython_debug/
 # Project speciffic files
 .env.local
 .test_resources/
+.database/
