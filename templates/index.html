@@ -1,50 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #apiResponse {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        #apiResponse.error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        #apiResponse.success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+    </style>
+</head>
 
 <body>
-    <h1>My First Heading</h1>
-    <p>My first paragraph.</p>
+    <h1>API Interaction Portal</h1>
+    <p>Enter some text below and click "Call API" to interact with the server.</p>
 
-    <input type="text" id="inputText" placeholder="Enter some text" />
+    <label for="inputText">Your Input:</label>
+    <input type="text" id="inputText" placeholder="Enter some text" aria-label="Text input for API" />
 
-    <!-- Button to trigger API call -->
     <button id="apiButton">Call API</button>
 
-    <!-- Section to display the API response -->
-    <div id="apiResponse" style="margin-top: 20px;"></div>
+    <div id="apiResponse" aria-live="polite"></div>
 
     <script>
-        // Add event listener for the button click
         document.getElementById('apiButton').addEventListener('click', async () => {
-            // Get the value from the input box
             const userInput = document.getElementById('inputText').value;
 
-            // Example API endpoint (replace with your own API URL)
+            if (!userInput.trim()) {
+                document.getElementById('apiResponse').className = 'error';
+                document.getElementById('apiResponse').innerHTML = '<strong>Error:</strong> Input cannot be empty.';
+                return;
+            }
+
             const apiUrl = '/getHelloWorld';
 
             try {
-                // Make the API call with fetch
                 const response = await fetch(apiUrl, {
-                    method: 'POST', // Use GET if the API requires it
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: userInput }) // Adjust payload structure as needed
+                    body: JSON.stringify({ name: userInput })
                 });
 
-                // Handle the response
                 if (response.ok) {
                     const data = await response.json();
-                    document.getElementById('apiResponse').innerHTML =
-                        `<strong>Response:</strong> ${data.message}`;
+                    document.getElementById('apiResponse').className = 'success';
+                    document.getElementById('apiResponse').innerHTML = `<strong>Response:</strong> ${data.message}`;
                 } else {
-                    const data = await response.json();
-                    document.getElementById('apiResponse').innerHTML =
-                        `<strong>Error:</strong> ${data.error} (${response.statusText} | ${response.statusText})`;
+                    const errorData = await response.json();
+                    document.getElementById('apiResponse').className = 'error';
+                    document.getElementById('apiResponse').innerHTML = `<strong>Error:</strong> ${errorData.error} (${response.status} - ${response.statusText})`;
                 }
             } catch (error) {
-                document.getElementById('apiResponse').innerHTML =
-                    `<strong>Error:</strong> ${error.message}`;
+                document.getElementById('apiResponse').className = 'error';
+                document.getElementById('apiResponse').innerHTML = `<strong>Error:</strong> ${error.message}`;
             }
         });
     </script>
