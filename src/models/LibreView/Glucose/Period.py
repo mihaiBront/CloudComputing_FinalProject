@@ -1,4 +1,5 @@
 from src.commons.Serializable import Serializable
+from src.db.iDatabaseCompliant import iDatabaseCompliant
 from src.models.LibreView.Glucose.Data import GData
 from src.commons.DateTimeHelper import DateTimeHelper
 
@@ -7,13 +8,13 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 @dataclass
-class Period(Serializable):
+class Period(Serializable, iDatabaseCompliant):
     DateEnd: str = field(default_factory=str)
     DateStart: str = field(default_factory=str)
     NoData: bool = field(default_factory=bool)
     AvgGlucose: int = field(default_factory=int)
     DaysOfData: int = field(default_factory=int)
-    Data: list[GData] = field(default_factory=list)
+    Data: GData = field(default_factory=list)
     
     @classmethod
     def from_dict(cls, json_dict):
@@ -38,5 +39,23 @@ class Period(Serializable):
         df.to_csv(save_path, index=False)
         
         return
+    
+    def createSchema_database(self, table_name):
+        return f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            DateStart TEXT NOT NULL,
+            DateEnd TEXT NOT NULL,
+            NoData BOOLEAN NOT NULL,
+            AvgGlucose INTEGER NOT NULL,
+            DaysOfData TEXT NOT NULL
+        )
+        """
+    
+    def insertSchema_database(self, table_name):
+        return f"""
+            f"INSERT INTO {table_name} (DateStart, DateEnd, NoData, AvgGlucose, DaysOfData) "
+            f"VALUES ({self.DateStart}, {self.DateEnd}, {self.NoData}, {self.AvgGlucose}, {json.dumps(self.Data.Blocks.to_dict())})"
+        """
     
     

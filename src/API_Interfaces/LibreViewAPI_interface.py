@@ -1,9 +1,12 @@
 from src.API_Interfaces.iAPI_interface import iAPI_interface
 from src.models.LibreView.OauthResponse import OauthResponse, User
+from src.models.LibreView.Glucose.GlucoseReadings import GlucoseReadings
+from src.commons.DateTimeHelper import DateTimeHelper
 
 import json
 import http.client
 from dataclasses import dataclass, field
+import numpy as np
 
 import logging as log
 
@@ -169,3 +172,60 @@ class LibreViewAPI_interface(iAPI_interface):
                 f.write(data)
                 
         return code, json.loads(data)["data"]
+    
+    def simulateGettingRealTimeMeasurements(self):
+        """Simulates the process of getting real-time measurements from the API. Pending real real time
+        measurement API development, this function gets historic average from last week's data, and trans-
+        forms it so it appears it is from the moment of the request.
+
+        Returns:
+            int: Return code
+            dict: Dictionary containing the simulated real-time measurements
+        """
+
+        code, data = self.getLastWeekMeasurement()
+
+        if code != 200:
+            log.error(f"Failed to get graph from LibreViewUp API ({code})")
+            return code, data
+
+        data = GlucoseReadings.from_dict(data)
+        
+        # get curve data (Percentile50 = Average Curve; tiem = xAxis labels)
+        last_period = data.Periods[-1].Data.Blocks
+        curve = last_period.Percentile50
+        time = last_period.Time
+        
+        # rearrange the vectors so the data follows this format:
+        #   - Data represents the last 24h
+        #   - Last measurement is the closest before the current timestamp
+        #   - First measurement is the closest after the current timestamp
+        #   - Modify the timestamp to account for today's date
+
+        now = DateTimeHelper.getTimestampNow()
+        # get the index of the last measurement after the current timestamp
+        index = -1
+        for i in range(len(time)):
+            ts = DateTimeHelper.dateTimeFromStr(time[i])
+            if ts.time() > now.time():
+                index = i
+                break
+        
+        if index == -1:
+            log.error(f"Failed to get the index of the last measurement after the current timestamp")
+            return -1, {"message":"Failed to get the index of the last measurement after the current timestamp"}
+        
+        # edit curve and time vectors
+        curve = np.concat((curve[:index],curve[index:]), axis=0)
+        time = time[index:] + time[:index]
+        
+        # adjusting date issues
+        time = [DateTimeHelper.changeDatePartString(t, now) for t in time] # TODO: Resolve the pre-noon date issue to yesterday        
+
+        # build dictionary with the graph data
+        graphdata = {
+            "glucose": curve,
+            "time": time
+        }
+        
+        return code, graphdata

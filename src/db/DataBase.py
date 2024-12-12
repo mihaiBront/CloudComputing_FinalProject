@@ -14,7 +14,7 @@ class DataBase(object):
     Connection: sqlite3.Connection | None = None
     Cursor: sqlite3.Cursor | None = None
     
-    def _createAndConnect(self):
+    def _createOrConnect(self):
         if not os.path.exists(self.Path):
             log.info(f"Creating database at {self.Path}")
             FileManagement.create_dir_if_not_exists(self.Path)

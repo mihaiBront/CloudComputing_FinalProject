@@ -70,3 +70,6 @@ class DeserializationTests(TestCase):
         # assert: check the object is filled
         self.assertIsInstance(glucose_response, GlucoseReadings)
         log.info(f"SUCCESS object serialized correctly")
+        
+    def test_getTodaysDate(self):
+        log.info(DateTimeHelper.getTimestampNow())

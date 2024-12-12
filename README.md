@@ -99,7 +99,6 @@ root/
 ├── .env                # Public environment variables (not sensitive)
 ├── .env.local          # Secret variables and credentials (sensitive)
 │
-├── .gitignore          # Git ignore rules
-│
+└── .gitignore          # Git ignore rules
 
 ```

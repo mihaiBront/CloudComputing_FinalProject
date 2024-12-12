@@ -8,6 +8,7 @@ from src.models.Spoonacular.Recipe import Recipe
 import os
 from dotenv import load_dotenv
 import json
+import plotly
 
 import logging as log
 from src.commons.LoggerInitializer import LoggerInitializer
@@ -106,3 +107,33 @@ class libreViewApiTests(TestCase):
         code, data = libreApi.getLastWeekMeasurement(1,7)
 
         print(f"Obtained code {code} ({data})")
+    
+    def test_simulateTodaysData(self):
+        libreApi = LibreViewAPI_interface()
+
+        code, data = libreApi.simulateGettingRealTimeMeasurements()
+
+        print(f"Obtained code {code} ({data})")
+        
+        fig = plotly.graph_objects.Figure()
+        fig.add_trace(plotly.graph_objects.Scatter(
+            x=data['time'],
+            y=data['glucose'],
+            mode='lines+markers',
+            name='Glucose Levels'
+        ))
+        
+        fig.update_layout(
+            title='Glucose Levels Over Time',
+            xaxis_title='Time',
+            yaxis_title='Glucose Level',
+            xaxis=dict(
+                # type='date',  # Ensure the axis is treated as datetime
+                # showgrid=True,  # Optional: adds grid lines for clarity
+                range=[min(data['time']), max(data['time'])]
+            )
+        )
+        
+        # fig.show()
+        fig.write_html(".test_resources/test.html")
+        

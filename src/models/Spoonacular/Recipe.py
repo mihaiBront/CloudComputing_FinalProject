@@ -35,5 +35,5 @@ class Recipe(Serializable):
    def insertSchema_database(self, table_name):
       return f"""
       f"INSERT INTO {table_name} (SpoonRecipeID, Title) "
-      f"VALUES ({self.SpoonRecipeID}, {self.title}?)"
+      f"VALUES ({self.SpoonRecipeID}, {self.title})"
       """
