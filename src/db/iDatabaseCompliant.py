@@ -5,5 +5,5 @@ class iDatabaseCompliant(object):
     def createSchema_database(tableName):
         log.fatal("Method not implemented")
     
-    def insertSchema_database(tableName):
+    def insertSchema_database(self, tableName):
         log.fatal("Method not implemented")

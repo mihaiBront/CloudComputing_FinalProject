@@ -40,7 +40,8 @@ class Period(Serializable, iDatabaseCompliant):
         
         return
     
-    def createSchema_database(self, table_name):
+    @staticmethod
+    def createSchema_database(table_name):
         return f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

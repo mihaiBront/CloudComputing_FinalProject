@@ -1,6 +1,6 @@
 from src.commons.FileManagement import FileManagement
 from src.models.Spoonacular.Recipe import Recipe
-from src.models.LibreView.User import User
+from src.models.LibreView.Glucose.Period import Period
 
 import sqlite3
 from dataclasses import dataclass, field
@@ -27,14 +27,18 @@ class DataBase(object):
     
     def _init_tables(self):
         log.info("Initializing tables")
+        
         #create recipes table
         self.Cursor.execute(Recipe.createSchema_database("recipes"))
         self.Connection.commit()
 
-        #TODO: create glucose hystoric table
+        #create glucose historic periods table
+        self.Cursor.execute(Period.createSchema_database("glucose_periods"))
+        self.Connection.commit()
         
         return
 
+#region recipe table methods
     def insertRecipe(self, recipe:Recipe):
         self.Cursor.execute(recipe.insertSchema_database("recipes"))
         self.Connection.commit()
@@ -45,3 +49,26 @@ class DataBase(object):
         self.Cursor.execute("SELECT * FROM recipes")
         recipes = self.Cursor.fetchmany(20)
         return recipes
+    
+    def deleteRecipe(self, recipe_id):
+        self.Cursor.execute(f"DELETE FROM recipes WHERE id = {recipe_id}")
+        self.Connection.commit()
+        return
+#endregion
+
+#region glucose periods table methods
+    def insertPeriod(self, period:Period):
+        self.Cursor.execute(period.insertSchema_database("glucose_periods"))
+        self.Connection.commit()
+        return
+
+    def getPeriodsList(self):
+        self.Cursor.execute("SELECT * FROM glucose_periods")
+        periods = self.Cursor.fetchmany(20)
+        return periods
+
+    def deletePeriod(self, period_id):
+        self.Cursor.execute(f"DELETE FROM glucose_periods WHERE id = {period_id}")
+        self.Connection.commit()
+        return
+#endregion
