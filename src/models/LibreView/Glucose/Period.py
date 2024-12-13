@@ -52,6 +52,8 @@ class Period(Serializable, iDatabaseCompliant):
             DaysOfData TEXT NOT NULL
         )
         """
+        
+    
     
     def insertSchema_database(self, table_name):
         return f"""
@@ -59,4 +61,7 @@ class Period(Serializable, iDatabaseCompliant):
             f"VALUES ({self.DateStart}, {self.DateEnd}, {self.NoData}, {self.AvgGlucose}, {json.dumps(self.Data.Blocks.to_dict())})"
         """
     
+    @staticmethod    
+    def getColumnsNames_database():
+        return ["id", "DateStart", "DateEnd", "NoData", "AvgGlucose", "DaysOfData"]
     

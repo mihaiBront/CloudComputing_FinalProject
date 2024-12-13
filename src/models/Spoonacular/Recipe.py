@@ -37,3 +37,7 @@ class Recipe(Serializable):
       f"INSERT INTO {table_name} (SpoonRecipeID, Title) "
       f"VALUES ({self.SpoonRecipeID}, {self.title})"
       """
+      
+   @staticmethod    
+   def getColumnsNames_database():
+      return ["id", "SpoonRecipeID", "Title"]

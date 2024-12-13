@@ -7,12 +7,14 @@ from dataclasses import dataclass, field
 import os
 import logging as log
 
-@dataclass
 class DataBase(object):
     Path:str = field(default_factory=str)
-    TablesSchema: list[dict] = field(default_factory=list)
     Connection: sqlite3.Connection | None = None
     Cursor: sqlite3.Cursor | None = None
+    
+    def __init__(self, path):
+        self.Path = path
+        self._createOrConnect()
     
     def _createOrConnect(self):
         if not os.path.exists(self.Path):
@@ -37,7 +39,7 @@ class DataBase(object):
         self.Connection.commit()
         
         return
-
+    
 #region recipe table methods
     def insertRecipe(self, recipe:Recipe):
         self.Cursor.execute(recipe.insertSchema_database("recipes"))
@@ -47,7 +49,7 @@ class DataBase(object):
     
     def getRecipesList(self):
         self.Cursor.execute("SELECT * FROM recipes")
-        recipes = self.Cursor.fetchmany(20)
+        recipes = self.Cursor.fetchall()
         return recipes
     
     def deleteRecipe(self, recipe_id):
@@ -64,7 +66,7 @@ class DataBase(object):
 
     def getPeriodsList(self):
         self.Cursor.execute("SELECT * FROM glucose_periods")
-        periods = self.Cursor.fetchmany(20)
+        periods = self.Cursor.fetchall()
         return periods
 
     def deletePeriod(self, period_id):
