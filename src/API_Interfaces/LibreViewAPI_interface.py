@@ -7,6 +7,7 @@ import json
 import http.client
 from dataclasses import dataclass, field
 import numpy as np
+from datetime import timedelta
 
 import logging as log
 
@@ -216,12 +217,17 @@ class LibreViewAPI_interface(iAPI_interface):
             return -1, {"message":"Failed to get the index of the last measurement after the current timestamp"}
         
         # edit curve and time vectors
-        curve = np.concat((curve[:index],curve[index:]), axis=0)
-        time = time[index:] + time[:index]
+        curve = np.concat((curve[index:-1],curve[:index]), axis=0)
+        time = time[index:-1] + time[:index]
         
-        # adjusting date issues
-        time = [DateTimeHelper.changeDatePartString(t, now) for t in time] # TODO: Resolve the pre-noon date issue to yesterday        
-
+        # adjusting date issues (after making that swap, the dates from the measurements
+        # previous to midnight have to bee set to (TODAY-1DAY).date and the ones from after
+        # that have to be set to TODAY.date())
+        time = [DateTimeHelper.changeDatePartString(t, now - timedelta(days=1)) 
+                    if DateTimeHelper.dateTimeFromStr(t).time() > now.time()
+                    else DateTimeHelper.changeDatePartString(t, now) 
+                for t in time]      
+        
         # build dictionary with the graph data
         graphdata = {
             "glucose": curve,

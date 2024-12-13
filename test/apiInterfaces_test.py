@@ -4,11 +4,14 @@ from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
 from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
 from src.models.LibreView.OauthResponse import OauthResponse
 from src.models.Spoonacular.Recipe import Recipe
+from src.models.LibreView.Glucose.GlucoseReadings import GlucoseReadings
+from src.commons.FileManagement import FileManagement
 
 import os
 from dotenv import load_dotenv
 import json
 import plotly
+import pandas as pd
 
 import logging as log
 from src.commons.LoggerInitializer import LoggerInitializer
@@ -105,16 +108,42 @@ class libreViewApiTests(TestCase):
         libreApi = LibreViewAPI_interface()
 
         code, data = libreApi.getLastWeekMeasurement(1,7)
-
-        print(f"Obtained code {code} ({data})")
+        
+        self.assertEqual(code, 200)
+        
+        try:
+            gr: GlucoseReadings = GlucoseReadings.from_dict(data)
+            self.assertIsInstance(gr, GlucoseReadings)
+            self.assertIsNotNone(gr.Periods)
+            self.assertGreater(len(gr.Periods), 0)
+            
+            if len(gr.Periods) > 0:
+                gr.to_excels(".test_resources/dumpedPeriods")
+            
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, f"Test failed due to exception ({e})")
+            
     
     def test_simulateTodaysData(self):
         libreApi = LibreViewAPI_interface()
 
         code, data = libreApi.simulateGettingRealTimeMeasurements()
 
-        print(f"Obtained code {code} ({data})")
+        self.assertEqual(code, 200)
+        self.assertIsInstance(data, dict)
+        self.assertIsNotNone(data['time'])
+        self.assertGreater(len(data['time']), 0)
+        self.assertIsNotNone(data['glucose'])
+        self.assertGreater(len(data['glucose']), 0)
         
+        _dir = ".test_resources/dumpGraph/test_synthetic.html"
+        FileManagement.create_dir_if_not_exists(_dir)
+        
+        # save data as csv
+        pd.DataFrame(data).to_csv(_dir.replace(".html", ".csv"))
+                
+        # make graph for visual evaluation        
         fig = plotly.graph_objects.Figure()
         fig.add_trace(plotly.graph_objects.Scatter(
             x=data['time'],
@@ -135,5 +164,5 @@ class libreViewApiTests(TestCase):
         )
         
         # fig.show()
-        fig.write_html(".test_resources/test.html")
+        fig.write_html(_dir)
         
