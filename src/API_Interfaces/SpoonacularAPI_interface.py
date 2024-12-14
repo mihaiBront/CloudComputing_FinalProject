@@ -61,14 +61,27 @@ class SpoonacularAPI_interface(iAPI_interface):
 
         return code, ret
     
-    def getNutritionWidgetFromRecipeID(self, recipeId: int):
-        """This method gets the nutrition widget of a recipe
+    def getBulkInformationFromRecipeId(self, recipe_id: int):
+        """This method gets the bulk information of a recipe
 
         Args:
-            recipeId (int): Recipe ID
+            recipe_id (int): Recipe ID
 
         Returns:
             tuple: Request code, returned data
         """
 
-        pass
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        params = {
+            "ids": recipe_id,
+            "includeNutrition": True
+        }
+
+        code, jsonPlain = self._apiRequest(f"/recipes/informationBulk", "GET",
+                                           headers=headers, params=params)
+        ret = json.loads(jsonPlain) # convert response to dict (could be modeled if necessary)
+
+        return code, ret

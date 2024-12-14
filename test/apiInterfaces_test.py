@@ -29,10 +29,16 @@ class spoonacularApiTests(TestCase):
             self.assertEqual(code, 200)
             self.assertIsInstance(response, list)
             self.assertIsInstance(response[0], dict)
+            
+            pathJson = ".test_resources/dumpSpoonacular/recipeList.json"
+            FileManagement.create_dir_if_not_exists(pathJson)
+            with open(pathJson, "w") as f:
+                f.write(json.dumps(response))
+            
             log.info(f"SUCCESS {response}")
         except Exception as e:
             log.error(e)
-            self.assertFalse(True, "Test failed")
+            self.assertFalse(True, f"Test failed ({e})")
             
     def test_deserializeRecipeToRecipeObject(self):
         self.spoon = SpoonacularAPI_interface()
@@ -71,6 +77,15 @@ class spoonacularApiTests(TestCase):
             log.error(e)
             self.assertFalse(True, "Test failed")
         
+    def test_getBulkGlycemicLoadFromIngredientsList(self):
+        self.spoon = SpoonacularAPI_interface()
+        try:
+            code, response = self.spoon.getBulkInformationFromRecipeId(716439)
+            self.assertEqual(code, 200)
+            log.info(f"SUCCESS {response}")
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, "Test failed")
 
 class libreViewApiTests(TestCase):
     def testConstruct(self):

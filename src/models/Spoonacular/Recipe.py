@@ -9,7 +9,7 @@ class Recipe(Serializable):
    Title:str = field(default_factory=str)
    Ingredients:list[Ingredient] = field(default_factory=list)
    Image:str = field(default_factory=str)
-   GlycemicIndex:float = field(default_factory=float)
+   GlycemicLoad:float = field(default_factory=float)
    
    @staticmethod
    def from_dict(json_data):
