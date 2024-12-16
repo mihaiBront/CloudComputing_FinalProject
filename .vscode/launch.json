@@ -16,6 +16,8 @@
             },
             "args": [
                 "run",
+                "-p",
+                "3950"
             ],
             "jinja": true,
             "justMyCode": true
