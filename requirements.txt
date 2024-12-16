@@ -1,3 +1,7 @@
 Flask
 python-dotenv
 pytest
+requests
+numpy
+pandas
+plotly
