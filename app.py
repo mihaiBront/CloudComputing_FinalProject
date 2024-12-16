@@ -124,7 +124,6 @@ def getRecipes():
     except Exception as ex:
         return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
     
-
 @app.route('/getRecipeInformation', methods=['POST'])
 def getRecipeInformation():
     """Gets detailed recipe information for a specific recipe ID
