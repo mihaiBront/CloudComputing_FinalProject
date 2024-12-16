@@ -207,17 +207,29 @@ def getGlucosePrediction():
         
         # TODO: When model is implemented, replace the second parameter passad to
         # PlotlyGraphHelper.glucosePredictionGraphHtml with the model prediction
-        htmlGraph = PlotlyGraphHelper.glucosePredictionGraphHtml(
-            responsedata, responsedata, ymin = 30, ymax = 350)
+        
+        
+        # htmlGraph = PlotlyGraphHelper.glucosePredictionGraphHtml(
+        #     responsedata, responsedata, ymin = 30, ymax = 350)
 
-        resp = jsonify(data={"graph": htmlGraph})
+        # resp = jsonify(data={"graph": htmlGraph})
 
-        if DEBUG:
-            with open(".test_resources/last_request_graph.html", "w") as f:
-                f.write(htmlGraph)
+        # if DEBUG:
+        #     with open(".test_resources/last_request_graph.html", "w") as f:
+        #         f.write(htmlGraph)
 
-        return resp, HTTPStatus.OK
+        # return resp, HTTPStatus.OK
+        
+        for key, value in responsedata.items():
+            responsedata[key] = list(value)
+        
+        ret = {
+            "readings": responsedata,
+            "prediction": responsedata
+        }
 
+        return ret, HTTPStatus.OK
+        
     except Exception as ex:
         return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
     
