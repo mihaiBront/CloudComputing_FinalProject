@@ -3,10 +3,13 @@ from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
 from src.models.LibreView.OauthResponse import OauthResponse
 from src.models.LibreView.Glucose.GlucoseReadings import GlucoseReadings
 from src.commons.DateTimeHelper import DateTimeHelper
+from src.glucosePrediction.GlucosePredictor import GlucosePredictor
 
+from sklearn.ensemble import RandomForestRegressor
 import os
 import logging as log
 from dotenv import load_dotenv
+import pandas as pd
 
 import logging
 import json
@@ -73,3 +76,18 @@ class DeserializationTests(TestCase):
         
     def test_getTodaysDate(self):
         log.info(DateTimeHelper.getTimestampNow())
+        
+    def test_glucosePredictorLoadObject(self):
+        predictor = GlucosePredictor(PathToModel="reggressionGlucoseSimple.joblib")
+        predictor.loadModel()
+        self.assertIsInstance(predictor.Model, RandomForestRegressor)
+        
+    def test_glucosePredictorPredict(self):
+        predictor = GlucosePredictor(PathToModel="reggressionGlucoseSimple.joblib")
+        predictor.loadModel()
+        
+        data = pd.read_csv(".test_resources/dumpGraph/test_synthetic.csv")
+        
+        prediction = predictor.predict1H(data["time"].values, data["glucose"].values, 2.5, 60)
+        log.info(f"Prediction: {prediction}")
+        self.assertIsInstance(prediction, float)

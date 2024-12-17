@@ -166,3 +166,4 @@ cython_debug/
 .database/
 docs/
 *Zone.identifier
+*.joblib
