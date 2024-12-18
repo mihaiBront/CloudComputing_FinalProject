@@ -284,41 +284,54 @@
     let recipes = []; // Store API response recipes
 
     // Function to fetch recipes based on ingredients
-    /* async function fetchRecipes(ingredients) {
+    async function fetchRecipes(ingredients) {
         const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(',')}&apiKey=${SPOONACULAR_API_KEY}`;
-    
+        
         try {
             console.log('Fetching recipes from URL:', url);
     
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
     
             const data = await response.json();
             console.log('Received data:', data);
     
             // Map the received data to the desired format
-            return data.map(recipe => ({
-                id: recipe.id,
-                title: recipe.title,
-                image: recipe.image,
-                ingredients: recipe.missedIngredients.map(ing => ing.name).join(', '),
-                glycemicIndex: calculateGlycemicIndex() // Mock function
+            const recipes = await Promise.all(data.map(async (recipe) => {
+                // Fetch detailed recipe information, including ingredients and glycemic load
+                const recipeDetailsUrl = `https://api.spoonacular.com/recipes/${recipe.id}/information?includeNutrition=true&apiKey=${SPOONACULAR_API_KEY}`;
+                const recipeResponse = await fetch(recipeDetailsUrl);
+                const recipeDetails = await recipeResponse.json();
+    
+                // Extract relevant data
+                return {
+                    id: recipe.id,
+                    title: recipe.title,
+                    image: recipe.image,
+                    glycemicLoad: recipeDetails.glycemicLoad || 'N/A', // Example placeholder
+                    ingredients: recipeDetails.extendedIngredients
+                        ? recipeDetails.extendedIngredients.map(ing => ing.name).join(', ')
+                        : 'N/A'
+                };
             }));
+    
+            return recipes;
         } catch (error) {
             console.error('Error fetching recipes:', error);
             return [];
         }
-    } */
+    }
+    
 
-    async function fetchRecipes() {
+    /* async function fetchRecipes() {
         return [
         { id: 1, ingredients: "Carrots, Rice", glycemicIndex: 180 },
         { id: 2, ingredients: "Bread, Eggs", glycemicIndex: 160 },
         { id: 3, ingredients: "Pasta, Cheese", glycemicIndex: 200 }
         ];
-    }
+    } */
     
     // Mock function to calculate glycemic index
     function calculateGlycemicIndex() {
