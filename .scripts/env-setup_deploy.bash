@@ -1,7 +1,7 @@
 #!/bin/bash
 echo off
 # Name of the directory to check
-VENV_DIR="../.venv" # Replace 'venv' with your specific virtual environment folder name if different.
+VENV_DIR="./.venv" # Replace 'venv' with your specific virtual environment folder name if different.
 
 if python -m venv --help &>/dev/null; then
   echo "python is already installed."
