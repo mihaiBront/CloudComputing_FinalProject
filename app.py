@@ -13,7 +13,7 @@ import os
 import json
 
 #---DEFINES---
-DEBUG = True
+DEBUG = False
     
 app = Flask(__name__)
 
@@ -108,6 +108,7 @@ def getRecipes():
         code, responsedata = spoon.getRecipiesFromIngredientsList(data.Ingredients, data.Count)
         
         if DEBUG:
+            if not os.path.exists(".test_resources"): os.mkdirs(".test_resources")
             with open(".test_resources/last_request_recipeList.json", "w") as f:
                 f.write(json.dumps(responsedata, indent=4))
         
@@ -171,6 +172,7 @@ def getRecipeInformation():
         code, responsedata = spoon.getBulkInformationFromRecipeId(data)
 
         if DEBUG:
+            if not os.path.exists(".test_resources"): os.mkdirs(".test_resources")
             with open(".test_resources/last_request_bulk.json", "w") as f:
                 f.write(json.dumps(responsedata, indent=4))
 
@@ -220,6 +222,7 @@ def getGlucoseData():
             htmlGraph = PlotlyGraphHelper.glucosePredictionGraphHtml(
                 responsedata, responsedata, ymin = 30, ymax = 350)
             
+            if not os.path.exists(".test_resources"): os.mkdirs(".test_resources")
             with open(".test_resources/last_request_graph.html", "w") as f:
                 f.write(htmlGraph)
         

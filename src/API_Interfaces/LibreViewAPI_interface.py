@@ -9,7 +9,11 @@ from dataclasses import dataclass, field
 import numpy as np
 from datetime import timedelta
 
+import os
 import logging as log
+
+DEBUG = False
+
 
 @dataclass
 class LibreViewAPI_interface(iAPI_interface):
@@ -169,8 +173,10 @@ class LibreViewAPI_interface(iAPI_interface):
         if code != 200:
             log.error(f"Failed to get graph from LibreViewUp API ({code})")
         else:
-            with open(".test_resources/glucoseHistory.json", "w") as f:
-                f.write(data)
+            if DEBUG:
+                if not os.path.exists(".test_resources"): os.mkdirs(".test_resources")
+                with open(".test_resources/glucoseHistory.json", "w") as f:
+                    f.write(data)
                 
         return code, json.loads(data)["data"]
     
