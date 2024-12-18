@@ -32,6 +32,7 @@ else
   # Confirm installation
   if python3 -m venv --help &>/dev/null; then
       echo "python3-venv has been successfully installed."
+      apt install -y python-is-python3
   else
       echo "Failed to install python3-venv. Please check your package manager."
       exit 1
