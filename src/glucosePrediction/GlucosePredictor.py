@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import joblib
 import numpy as np
 import pandas as pd
-import os
 
 @dataclass
 class GlucosePredictor(object):
@@ -13,7 +12,6 @@ class GlucosePredictor(object):
     
     def loadModel(self):
         """Loads the model from the specified path"""
-        ldir = os.listdir()
         self.Model = joblib.load(self.PathToModel)
         
     def _convertGlucose_mgDl_to_mmolL(self, glucose_mgDl: float):
@@ -112,10 +110,10 @@ class GlucosePredictor(object):
         list_glucose = glucose_array[-colsForInterp:].tolist()
         list_glucose.append(prediction[0])
         
-        pred_df = pd.DataFrame()
+        pred_df = pd.DataFrame() # dataframe for the prediction interpolation
         pred_df["time"] = list_time
         pred_df["glucose"] = list_glucose
-        pred_df = pred_df.set_index("time").resample("5T").interpolate(method="cubic").reset_index()
+        pred_df = pred_df.set_index("time").resample("10    T").interpolate(method="cubic").reset_index()
         pred_df["time"] = pred_df["time"].apply(lambda x: x.strftime("%Y-%m-%d %H:%M:%S"))
         
         # generate prediction points
