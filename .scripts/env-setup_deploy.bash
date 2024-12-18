@@ -7,23 +7,23 @@ if python -m venv --help &>/dev/null; then
   echo "python is already installed."
 elif python3 -m venv --help &>/dev/null; then
   echo "python3 is installed but python does not point to python3..."
-  sudo ln -s $(which python3) /usr/bin/python
+  ln -s $(which python3) /usr/bin/python
 else
   echo "no python installed...aborted"
   # Detect package manager and install python3-venv
   if [ -f /etc/debian_version ]; then
       # Debian/Ubuntu-based systems
-      sudo apt update
-      sudo apt install -y python3-venv
+      apt update
+      apt install -y python3-venv
   elif [ -f /etc/redhat-release ]; then
       # Red Hat-based systems
-      sudo yum install -y python3-venv
+      yum install -y python3-venv
   elif [ -f /etc/arch-release ]; then
       # Arch-based systems
-      sudo pacman -S --noconfirm python-virtualenv
+      pacman -S --noconfirm python-virtualenv
   elif [ -f /etc/SuSE-release ]; then
       # SUSE-based systems
-      sudo zypper install -y python3-virtualenv
+      zypper install -y python3-virtualenv
   else
       echo "Unsupported Linux distribution. Please install python3-venv manually."
       exit 1
@@ -42,8 +42,8 @@ if dpkg -l | grep -qw "python3-venv"; then
     echo "python3-venv is already installed."
 else
     echo "python3-venv is not installed. Installing now..."
-    sudo apt update
-    sudo apt install -y python3-venv
+    apt update
+    apt install -y python3-venv
     if [ $? -eq 0 ]; then
         echo "python3-venv was successfully installed."
     else
