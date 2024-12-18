@@ -3,15 +3,16 @@ from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
 import src.models.ClientRequestModels as ClientRequestModels
 from src.models.Spoonacular.Recipe import Recipe
 from src.models.Spoonacular.RecipeProceedure import RecipeProceedure
-from src.models.LibreView.Glucose.GlucoseReadings import GlucoseReadings
 from src.commons.PlotlyGraphHelper import PlotlyGraphHelper
+from src.glucosePrediction.GlucosePredictor import GlucosePredictor
 
 from flask import Flask, render_template, jsonify, request
 from http import HTTPStatus
+import os
 import json
 
 #---DEFINES---
-DEBUG = False
+DEBUG = True
     
 app = Flask(__name__)
 
@@ -177,8 +178,8 @@ def getRecipeInformation():
     except Exception as ex:
         return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
     
-@app.route('/getGlucosePrediction', methods=['GET'])
-def getGlucosePrediction():
+@app.route('/getGlucoseData', methods=['GET'])
+def getGlucoseData():
     """Gets glucose readings for the last 24 hours and generates visualization
     
     Makes a GET request to retrieve glucose data and creates an interactive plot
@@ -204,20 +205,13 @@ def getGlucosePrediction():
         if code != HTTPStatus.OK:
             return jsonify(error=f"(responsedata)"), code
         
-        # TODO: When model is implemented, replace the second parameter passad to
-        # PlotlyGraphHelper.glucosePredictionGraphHtml with the model prediction
-        
-        
-        # htmlGraph = PlotlyGraphHelper.glucosePredictionGraphHtml(
-        #     responsedata, responsedata, ymin = 30, ymax = 350)
-
-        # resp = jsonify(data={"graph": htmlGraph})
-
-        # if DEBUG:
-        #     with open(".test_resources/last_request_graph.html", "w") as f:
-        #         f.write(htmlGraph)
-
-        # return resp, HTTPStatus.OK
+        if DEBUG:
+            
+            htmlGraph = PlotlyGraphHelper.glucosePredictionGraphHtml(
+                responsedata, responsedata, ymin = 30, ymax = 350)
+            
+            with open(".test_resources/last_request_graph.html", "w") as f:
+                f.write(htmlGraph)
         
         for key, value in responsedata.items():
             responsedata[key] = list(value)
@@ -226,6 +220,72 @@ def getGlucosePrediction():
             "readings": responsedata,
             "prediction": responsedata
         }
+
+        return ret, HTTPStatus.OK
+        
+    except Exception as ex:
+        return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
+    
+@app.route('/getGlucosePrediction', methods=['Post'])
+def getGlucosePrediction():
+    """Gets glucose readings for the last 24 hours and generates visualization
+    
+    Makes a GET request to retrieve glucose data and creates an interactive plot
+    
+    Returns:
+        tuple: JSON response containing:
+            - data (dict): Dictionary containing:
+                - graph (str): HTML string of Plotly graph visualization showing:
+                    - Historical glucose readings for last 24 hours
+                    - Predicted glucose values (currently returns actual values)
+                    - Graph y-axis range from 30-350 mg/dL
+            - HTTP status code
+            
+    Raises:
+        HTTPStatus.BAD_REQUEST: If request fails
+        HTTPStatus.INTERNAL_SERVER_ERROR: If API call fails
+    """        
+    try:
+        # get request data
+        data = request.get_json()
+        
+        _insulin_input = float(data.get("insulin", 0))
+        _carbs_input = float(data.get("carbs", 0))
+        
+        # making api petition for glucose data
+        libre = LibreViewAPI_interface()
+        code, responsedata = libre.simulateGettingRealTimeMeasurements()
+
+        if code != HTTPStatus.OK:
+            return jsonify(error=f"(responsedata)"), code
+
+        # TODO: make prediction:
+        try:            
+            _model = GlucosePredictor('./reggressionGlucoseSimple.joblib')
+            _model.loadModel()
+            
+            prediction = _model.simulatePrediction(responsedata["time"], responsedata["glucose"], _insulin_input, _carbs_input)
+        except Exception as ex:
+            return jsonify(error=f"Prediction failed: {ex}"), HTTPStatus.INTERNAL_SERVER_ERROR            
+        
+        # convert data to arrays
+        for key, value in responsedata.items():
+            responsedata[key] = list(value)
+        
+        for key, value in prediction.items():
+            prediction[key] = list(value)
+        
+        ret = {
+            "readings": responsedata,
+            "prediction": prediction
+        }
+        
+        if DEBUG:
+            htmlGraph = PlotlyGraphHelper.glucosePredictionGraphHtml(
+                responsedata, prediction, ymin = 30, ymax = 350)
+            
+            with open("./.test_resources/last_request_graph_ored.html", "w") as f:
+                f.write(htmlGraph)
 
         return ret, HTTPStatus.OK
         
