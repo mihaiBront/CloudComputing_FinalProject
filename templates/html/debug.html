@@ -100,13 +100,19 @@
             // Example API endpoint (replace with your own API URL)
             const apiUrl = '/getGlucosePrediction';
 
+            _body = {
+                insulin: 3.5,
+                carbs: 50
+            }
+
             try {
                 // Make the API call with fetch
                 const response = await fetch(apiUrl, {
-                    method: 'GET', // Use GET if the API requires it
+                    method: 'POST', // Use POST if the API requires it
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    body: JSON.stringify(_body)
                 });
 
                 // Handle the response
