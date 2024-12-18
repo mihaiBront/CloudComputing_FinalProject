@@ -69,6 +69,12 @@ if [ -d "$VENV_DIR" ] && [ -f "$VENV_DIR/bin/activate" ]; then
   . $VENV_DIR/bin/activate
 else
   echo "Failed creating environment"
+  echo "listing ."
+  ls -a
+  echo "listing .."
+  ls .. -a
+  echo "listing .scripts"
+  ls .scripts -a
   exit -1
 fi
 
