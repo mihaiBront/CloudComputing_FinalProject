@@ -89,7 +89,7 @@ fi
 
 # Download the needed model
 FILE_URL="https://www.dropbox.com/scl/fi/zx3q65yaoigwpdwyovlip/reggressionGlucoseSimple.joblib?rlkey=lfig1q76rmtea2dr5tr2qwq53&st=6nmy2bpk&dl=1"
-FILE_NAME="../reggressionGlucoseSimple.joblib"
+FILE_NAME="./reggressionGlucoseSimple.joblib"
 
 if [ -f "$FILE_NAME" ]; then # Only if it does not already exist
     echo "File '$FILE_NAME' already exists. Skipping download."
