@@ -8,6 +8,7 @@ from src.glucosePrediction.GlucosePredictor import GlucosePredictor
 
 from flask import Flask, render_template, jsonify, request
 from http import HTTPStatus
+from dotenv import load_dotenv, set_key
 import os
 import json
 
@@ -38,6 +39,15 @@ def debug():
         str: Template
     """
     return render_template('html/debug.html')
+
+@app.route('/login')
+def recipe():
+    """ Navigates to the login page
+
+    Returns:
+        str: Template
+    """
+    return render_template('html/login.html')
 
 #endregion
 
@@ -226,7 +236,7 @@ def getGlucoseData():
     except Exception as ex:
         return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
     
-@app.route('/getGlucosePrediction', methods=['Post'])
+@app.route('/getGlucosePrediction', methods=['POST'])
 def getGlucosePrediction():
     """Gets glucose readings for the last 24 hours and generates visualization
     
@@ -291,5 +301,43 @@ def getGlucosePrediction():
         
     except Exception as ex:
         return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
-    
+
+@app.route('/setApiKeys', methods=['POST'])
+def setApiKeys():
+    """Sets API keys for Spoonacular and LibreView
+
+    Expects a POST request with JSON payload containing:
+    - spoonacularAPIKey (str): Spoonacular API key
+    - libreViewAPIKey (str): LibreView API key
+
+    Returns:
+        tuple: JSON response containing:
+            - message (str): Success message
+            - HTTP status code
+
+    Raises:
+        HTTPStatus.BAD_REQUEST: If request payload is invalid
+        HTTPStatus.INTERNAL_SERVER_ERROR: If API call fails
+    """
+    try:
+        #get passed json
+        data = request.get_json()
+
+        _spoonacularAPIKey = data.get('spoonacularAPIKey', '')
+        _libreviewApiKey = data.get('libreViewAPIKey', '')
+        _libreviewAccountId = data.get('libreViewAccountId', '')
+
+        secretEnvPath = ".env.local"
+        if not os.path.exists(secretEnvPath):
+            with open(secretEnvPath, "w") as f:
+                pass
+        
+        set_key(secretEnvPath, "SPOONACULAR_API_KEY", _spoonacularAPIKey)
+        set_key(secretEnvPath, "LIBREVIEW_API_KEY", _libreviewApiKey)
+        set_key(secretEnvPath, "LIBREVIEW_ACCOUNT_ID", _libreviewAccountId)
+        
+        return jsonify(message="API keys set successfully"), HTTPStatus.OK
+
+    except Exception as ex:
+        return jsonify(error=f"{ex}"), HTTPStatus.BAD_REQUEST
 #endregion
