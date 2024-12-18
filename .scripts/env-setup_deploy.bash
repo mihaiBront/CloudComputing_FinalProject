@@ -64,6 +64,8 @@ else
     echo 'Virtual environment created'
 fi
 
+echo "Env dir is $VENV_DIR"
+
 if [ -d "$VENV_DIR" ] && [ -f "$VENV_DIR/bin/activate" ]; then
   echo "Activating the virtual environment..."
   . $VENV_DIR/bin/activate
