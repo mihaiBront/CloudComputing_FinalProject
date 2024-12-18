@@ -1,112 +1,3 @@
-<!--DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Portal</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-        }
-
-        h1 {
-            color: #333;
-        }
-
-        input, button {
-            padding: 10px;
-            margin: 5px 0;
-            font-size: 16px;
-        }
-
-        button {
-            cursor: pointer;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #apiResponse {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-        }
-
-        #apiResponse.error {
-            border-color: #dc3545;
-            background-color: #f8d7da;
-        }
-
-        #apiResponse.success {
-            border-color: #28a745;
-            background-color: #d4edda;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>API Interaction Portal</h1>
-    <p>Enter some text below and click "Call API" to interact with the server.</p>
-
-    <label for="inputText">Your Input:</label>
-    <input type="text" id="inputText" placeholder="Enter some text" aria-label="Text input for API" />
-
-    <button id="apiButton">Call API</button>
-
-    <div id="apiResponse" aria-live="polite"></div>
-
-    <script>
-        document.getElementById('apiButton').addEventListener('click', async () => {
-            const userInput = document.getElementById('inputText').value;
-
-            if (!userInput.trim()) {
-                document.getElementById('apiResponse').className = 'error';
-                document.getElementById('apiResponse').innerHTML = '<strong>Error:</strong> Input cannot be empty.';
-                return;
-            }
-
-            const apiUrl = '/getHelloWorld';
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name: userInput })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('apiResponse').className = 'success';
-                    document.getElementById('apiResponse').innerHTML = `<strong>Response:</strong> ${data.message}`;
-                } else {
-                    const errorData = await response.json();
-                    document.getElementById('apiResponse').className = 'error';
-                    document.getElementById('apiResponse').innerHTML = `<strong>Error:</strong> ${errorData.error} (${response.status} - ${response.statusText})`;
-                }
-            } catch (error) {
-                document.getElementById('apiResponse').className = 'error';
-                document.getElementById('apiResponse').innerHTML = `<strong>Error:</strong> ${error.message}`;
-            }
-        });
-    </script>
-</body>
-
-</html-->
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -114,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Insulin Predictor</title>
-    <!-- Import a chart library (Chart.js) -->
+    <!-- Import Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* General Page Styling */
@@ -213,7 +104,6 @@
         .recipe-details {
             font-size: 1rem;
         }
-
     </style>
 </head>
 
@@ -260,159 +150,145 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // API Key should be handled securely (not directly in client-side code)
-    
-    /* import dotenv from 'dotenv';
-    dotenv.config();
+    <script>
+        // Recipe and Chart Handling
+        const generateRecipesBtn = document.getElementById("generateRecipesBtn");
+        const recipeList = document.getElementById("recipeList");
+        const glucoseChartCanvas = document.getElementById("glucoseChart");
+        const recipeDetails = document.getElementById("recipeDetails");
+        const insulinDosesSelect = document.getElementById("insulinDoses");
 
-    const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+        let glucoseChart; // Chart instance
+        let recipes = []; // Store API response recipes
 
-    if (!SPOONACULAR_API_KEY) {
-        console.error('Spoonacular API Key is not defined');
-        alert('API configuration error');
-    } */
+        // Function to fetch recipes based on ingredients
+        async function fetchRecipes(ingredients) {
+            try {
+                const apiUrl = '/getRecipes';
+                
+                const requestBody = {
+                    ingredients: ingredients,
+                    count: 3
+                };
 
-    // Recipe and Chart Handling
-    const generateRecipesBtn = document.getElementById("generateRecipesBtn");
-    const recipeList = document.getElementById("recipeList");
-    const glucoseChartCanvas = document.getElementById("glucoseChart");
-    const recipeDetails = document.getElementById("recipeDetails");
-    const insulinDosesSelect = document.getElementById("insulinDoses");
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
 
-    let glucoseChart; // Chart instance
-    let recipes = []; // Store API response recipes
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
 
-    // Function to fetch recipes based on ingredients
-    async function fetchRecipes(ingredients) {
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(',')}&apiKey=${SPOONACULAR_API_KEY}`;
-        
-        try {
-            console.log('Fetching recipes from URL:', url);
-    
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-    
-            const data = await response.json();
-            console.log('Received data:', data);
-    
-            // Map the received data to the desired format
-            const recipes = await Promise.all(data.map(async (recipe) => {
-                // Fetch detailed recipe information, including ingredients and glycemic load
-                const recipeDetailsUrl = `https://api.spoonacular.com/recipes/${recipe.id}/information?includeNutrition=true&apiKey=${SPOONACULAR_API_KEY}`;
-                const recipeResponse = await fetch(recipeDetailsUrl);
-                const recipeDetails = await recipeResponse.json();
-    
-                // Extract relevant data
-                return {
+                const data = await response.json();
+                console.log('Received data:', data);
+
+                // Assuming the API returns data in a similar format to the previous implementation
+                return data.map(recipe => ({
                     id: recipe.id,
                     title: recipe.title,
                     image: recipe.image,
-                    glycemicLoad: recipeDetails.glycemicLoad || 'N/A', // Example placeholder
-                    ingredients: recipeDetails.extendedIngredients
-                        ? recipeDetails.extendedIngredients.map(ing => ing.name).join(', ')
-                        : 'N/A'
-                };
-            }));
-    
-            return recipes;
-        } catch (error) {
-            console.error('Error fetching recipes:', error);
-            return [];
-        }
-    }
-    
-
-    /* async function fetchRecipes() {
-        return [
-        { id: 1, ingredients: "Carrots, Rice", glycemicIndex: 180 },
-        { id: 2, ingredients: "Bread, Eggs", glycemicIndex: 160 },
-        { id: 3, ingredients: "Pasta, Cheese", glycemicIndex: 200 }
-        ];
-    } */
-    
-    // Mock function to calculate glycemic index
-    function calculateGlycemicIndex() {
-        return Math.floor(Math.random() * 100) + 100;
-    }
-    
-    // Event Listener: Generate Recipes
-    generateRecipesBtn.addEventListener("click", async () => {
-        const input = document.getElementById("ingredientsInput").value;
-        const ingredients = input.split(',').map(ing => ing.trim());
-
-        if (ingredients.length === 0 || input.trim() === '') {
-            alert("Please enter ingredients!");
-            return;
+                    glycemicLoad: recipe.glycemicLoad || 'N/A',
+                    ingredients: recipe.ingredients || 'N/A'
+                }));
+            } catch (error) {
+                console.error('Error fetching recipes:', error);
+                // Fallback mock data
+                return [
+                    { id: 1, ingredients: "Carrots, Rice", glycemicLoad: 180 },
+                    { id: 2, ingredients: "Bread, Eggs", glycemicLoad: 160 },
+                    { id: 3, ingredients: "Pasta, Cheese", glycemicLoad: 200 }
+                ];
+            }
         }
 
-        // Fetch recipes
-        recipes = await fetchRecipes(ingredients);
+        // Event Listener: Generate Recipes
+        generateRecipesBtn.addEventListener("click", async () => {
+            const input = document.getElementById("ingredientsInput").value;
+            const ingredients = input.split(',').map(ing => ing.trim());
 
-        // Populate recipe list
-        recipeList.innerHTML = "";
-        recipes.forEach((recipe, index) => {
-            const recipeItem = document.createElement("div");
-            recipeItem.className = "recipe-item";
-            recipeItem.innerHTML = `
-                <strong>RECIPE ${index + 1}</strong><br>
-                Ingredients: ${recipe.ingredients}<br>
-                Glycemic Index: ${recipe.glycemicIndex}
-            `;
-            recipeItem.onclick = () => displayRecipeDetails(recipe, index, recipeItem);
-            recipeList.appendChild(recipeItem);
-        });
-    });
+            if (ingredients.length === 0 || input.trim() === '') {
+                alert("Please enter ingredients!");
+                return;
+            }
 
-    // Display Recipe Details and Update Chart
-    function displayRecipeDetails(recipe, index, selectedItem) {
-        // Highlight selected recipe
-        document.querySelectorAll(".recipe-item").forEach(item => item.classList.remove("selected"));
-        selectedItem.classList.add("selected");
+            try {
+                // Fetch recipes
+                recipes = await fetchRecipes(ingredients);
 
-        // Update recipe details
-        recipeDetails.innerHTML = `
-            <strong>RECIPE ${index + 1}</strong>
-            <p>Ingredients: ${recipe.ingredients}</p>
-            <p>Glycemic Index: ${recipe.glycemicIndex}</p>
-        `;
-
-        // Update glucose chart
-        updateChart(recipe.glycemicIndex);
-    }
-
-    // Update Chart with Glycemic Index
-    function updateChart(glycemicIndex) {
-        const insulinDose = insulinDosesSelect.value;
-
-        const data = Array.from({ length: 10 }, (_, i) => glycemicIndex / insulinDose * Math.exp(-i / 2));
-
-        if (glucoseChart) glucoseChart.destroy();
-
-        glucoseChart = new Chart(glucoseChartCanvas, {
-            type: "line",
-            data: {
-                labels: Array.from({ length: 10 }, (_, i) => i),
-                datasets: [{
-                    label: "Glucose Peak",
-                    data: data,
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    backgroundColor: "rgba(75, 192, 192, 0.2)",
-                    borderWidth: 2,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
+                // Populate recipe list
+                recipeList.innerHTML = "";
+                recipes.forEach((recipe, index) => {
+                    const recipeItem = document.createElement("div");
+                    recipeItem.className = "recipe-item";
+                    recipeItem.innerHTML = `
+                        <strong>RECIPE ${index + 1}</strong><br>
+                        Ingredients: ${recipe.ingredients}<br>
+                        Glycemic Load: ${recipe.glycemicLoad}
+                    `;
+                    recipeItem.onclick = () => displayRecipeDetails(recipe, index, recipeItem);
+                    recipeList.appendChild(recipeItem);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to fetch recipes');
             }
         });
-    }
-</script>
+
+        // Display Recipe Details and Update Chart
+        function displayRecipeDetails(recipe, index, selectedItem) {
+            // Highlight selected recipe
+            document.querySelectorAll(".recipe-item").forEach(item => item.classList.remove("selected"));
+            selectedItem.classList.add("selected");
+
+            // Update recipe details
+            recipeDetails.innerHTML = `
+                <strong>RECIPE ${index + 1}: ${recipe.title || 'Unknown Recipe'}</strong>
+                <p>Ingredients: ${recipe.ingredients}</p>
+                <p>Glycemic Load: ${recipe.glycemicLoad}</p>
+                ${recipe.image ? `<img src="${recipe.image}" alt="${recipe.title}" style="max-width: 100%;">` : ''}
+            `;
+
+            // Update glucose chart
+            updateChart(recipe.glycemicLoad);
+        }
+
+        // Update Chart with Glycemic Index
+        function updateChart(glycemicIndex) {
+            const insulinDose = insulinDosesSelect.value;
+
+            const data = Array.from({ length: 10 }, (_, i) => glycemicIndex / insulinDose * Math.exp(-i / 2));
+
+            if (glucoseChart) glucoseChart.destroy();
+
+            glucoseChart = new Chart(glucoseChartCanvas, {
+                type: "line",
+                data: {
+                    labels: Array.from({ length: 10 }, (_, i) => i),
+                    datasets: [{
+                        label: "Glucose Peak",
+                        data: data,
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        backgroundColor: "rgba(75, 192, 192, 0.2)",
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Initialize chart with default values
+        updateChart(180);
+    </script>
 </body>
 
 </html>
