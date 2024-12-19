@@ -268,9 +268,10 @@
 
         // Update Chart with Glycemic Index
         function updateChart(glycemicIndex) {
+            
             const insulinDose = insulinDosesSelect.value;
 
-            const apiUrl = '/getGlucosePrediction';
+            /* const apiUrl = '/getGlucosePrediction';
                 
             const requestBody = {
             };
@@ -288,7 +289,7 @@
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            } */
 
             const data = Array.from({ length: 10 }, (_, i) => glycemicIndex / insulinDose * Math.exp(-i / 2));
 
