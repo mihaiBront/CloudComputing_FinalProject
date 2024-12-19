@@ -1,52 +1,324 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insulin Predictor</title>
+    <!-- Import Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Page Styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem;
+        }
+
+        /* Left Section: Recipes */
+        .recipes {
+            flex: 1;
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 1rem;
+            box-shadow: 0 0 5px #aaa;
+            max-width: 25%;
+        }
+
+        .recipes input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .recipes button {
+            width: 100%;
+            background-color: #d3d3d3;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .recipe-list {
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .recipe-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .recipe-item.selected {
+            background-color: #e8f9e8;
+            border: 1px solid #7cd67c;
+        }
+
+        /* Right Section: Graph & Details */
+        .details {
+            flex: 3;
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 1rem;
+            box-shadow: 0 0 5px #aaa;
+        }
+
+        #glucoseChart {
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .insulin-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        select, input {
+            padding: 0.5rem;
+        }
+
+        .recipe-details {
+            font-size: 1rem;
+        }
+    </style>
+</head>
 
 <body>
-    <h1>My First Heading</h1>
-    <p>My first paragraph.</p>
+    <!-- Header -->
+    <header>Insulin Predictor</header>
 
-    <input type="text" id="inputText" placeholder="Enter some text" />
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Section: Recipe Input and List -->
+        <div class="recipes">
+            <input type="text" id="ingredientsInput" placeholder="Ingredient_1, ingredient2 ..." />
+            <button id="generateRecipesBtn">GENERATE RECIPES</button>
 
-    <!-- Button to trigger API call -->
-    <button id="apiButton">Call API</button>
+            <!-- Recipe List -->
+            <div class="recipe-list" id="recipeList">
+                <!-- Recipes will be dynamically inserted here -->
+            </div>
+        </div>
 
-    <!-- Section to display the API response -->
-    <div id="apiResponse" style="margin-top: 20px;"></div>
+        <!-- Right Section: Details and Chart -->
+        <div class="details">
+            <!-- Chart Section -->
+            <canvas id="glucoseChart"></canvas>
 
+            <!-- Insulin Input -->
+            <div class="insulin-input">
+                <label for="insulinDoses">Insulin Doses:</label>
+                <select id="insulinDoses">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+
+            <!-- Recipe Details -->
+            <div id="recipeDetails" class="recipe-details">
+                <strong>RECIPE 1</strong>
+                <p>Ingredients: ???</p>
+                <p>Glycemic Index: 180</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Add event listener for the button click
-        document.getElementById('apiButton').addEventListener('click', async () => {
-            // Get the value from the input box
-            const userInput = document.getElementById('inputText').value;
+        // Recipe and Chart Handling
+        const generateRecipesBtn = document.getElementById("generateRecipesBtn");
+        const recipeList = document.getElementById("recipeList");
+        const glucoseChartCanvas = document.getElementById("glucoseChart");
+        const recipeDetails = document.getElementById("recipeDetails");
+        const insulinDosesSelect = document.getElementById("insulinDoses");
 
-            // Example API endpoint (replace with your own API URL)
-            const apiUrl = '/getHelloWorld';
+        let glucoseChart; // Chart instance
+        let recipes = []; // Store API response recipes
 
+        console.log("Prova");
+
+        // Function to fetch recipes based on ingredients
+        async function fetchRecipes(ingredients) {
             try {
-                // Make the API call with fetch
+                const apiUrl = '/getRecipes';
+                
+                const requestBody = {
+                    ingredients: ingredients,
+                    count: 3
+                };
+
+                console.log(requestBody);
+
                 const response = await fetch(apiUrl, {
-                    method: 'POST', // Use GET if the API requires it
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: userInput }) // Adjust payload structure as needed
+                    body: JSON.stringify(requestBody)
                 });
 
-                // Handle the response
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('apiResponse').innerHTML =
-                        `<strong>Response:</strong> ${data.message}`;
-                } else {
-                    const data = await response.json();
-                    document.getElementById('apiResponse').innerHTML =
-                        `<strong>Error:</strong> ${data.error} (${response.statusText} | ${response.statusText})`;
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
+
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                // Map over the recipes array
+                return data.recipes.map(recipe => ({
+                    id: recipe.SpoonRecipeID || 'N/A',
+                    title: recipe.Title || 'N/A',
+                    image: recipe.Image || 'N/A',
+                    glycemicLoad: recipe.GlycemicLoad || 'N/A',
+                    // Extract ingredient names and join them into a string
+                    ingredients: recipe.Ingredients.map(ingredient => ingredient.Name).join(', ') || 'N/A'
+                }));
+                
+                
             } catch (error) {
-                document.getElementById('apiResponse').innerHTML =
-                    `<strong>Error:</strong> ${error.message}`;
+                console.error('Error fetching recipes:', error);
+                return [
+                    { id: 1, ingredients: "Carrots, Rice", glycemicLoad: 180 },
+                    { id: 2, ingredients: "Bread, Eggs", glycemicLoad: 160 },
+                    { id: 3, ingredients: "Pasta, Cheese", glycemicLoad: 200 }
+                ];
+            }
+        }
+
+        // Event Listener: Generate Recipes
+        generateRecipesBtn.addEventListener("click", async () => {
+            const input = document.getElementById("ingredientsInput").value;
+            const ingredients = input.split(',').map(ing => ing.trim());
+
+            console.log(ingredients);
+
+            if (ingredients.length === 0 || input.trim() === '') {
+                alert("Please enter ingredients");
+                return;
+            }
+
+            try {
+                // Fetch recipes
+                recipes = await fetchRecipes(ingredients);
+
+                // Populate recipe list
+                recipeList.innerHTML = "";
+                recipes.forEach((recipe, index) => {
+                    const recipeItem = document.createElement("div");
+                    recipeItem.className = "recipe-item";
+                    recipeItem.innerHTML = `
+                        <strong>RECIPE ${index + 1}</strong><br>
+                        Title: ${recipe.title}
+                        Ingredients: ${recipe.ingredients}<br>
+                        Glycemic Load: ${recipe.glycemicLoad}
+                    `;
+                    recipeItem.onclick = () => displayRecipeDetails(recipe, index, recipeItem);
+                    recipeList.appendChild(recipeItem);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to fetch recipes');
             }
         });
+
+        // Display Recipe Details and Update Chart
+        function displayRecipeDetails(recipe, index, selectedItem) {
+            // Highlight selected recipe
+            document.querySelectorAll(".recipe-item").forEach(item => item.classList.remove("selected"));
+            selectedItem.classList.add("selected");
+
+            // Update recipe details
+            recipeDetails.innerHTML = `
+                <strong>RECIPE ${index + 1}: ${recipe.title || 'Unknown Recipe'}</strong>
+                <p>Ingredients: ${recipe.ingredients}</p>
+                <p>Glycemic Load: ${recipe.glycemicLoad}</p>
+                ${recipe.image ? `<img src="${recipe.image}" alt="${recipe.title}" style="max-width: 100%;">` : ''}
+            `;
+
+            // Update glucose chart
+            updateChart(recipe.glycemicLoad);
+        }
+
+        // Update Chart with Glycemic Index
+        function updateChart(glycemicIndex) {
+            
+            const insulinDose = insulinDosesSelect.value;
+
+            /* const apiUrl = '/getGlucosePrediction';
+                
+            const requestBody = {
+            };
+
+            console.log(requestBody);
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            } */
+
+            const data = Array.from({ length: 10 }, (_, i) => glycemicIndex / insulinDose * Math.exp(-i / 2));
+
+            if (glucoseChart) glucoseChart.destroy();
+
+            glucoseChart = new Chart(glucoseChartCanvas, {
+                type: "line",
+                data: {
+                    labels: Array.from({ length: 10 }, (_, i) => i),
+                    datasets: [{
+                        label: "Glucose Peak",
+                        data: data,
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        backgroundColor: "rgba(75, 192, 192, 0.2)",
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Initialize chart with default values
+        updateChart(180);
     </script>
 </body>
 

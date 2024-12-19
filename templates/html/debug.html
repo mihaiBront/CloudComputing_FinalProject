@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>My First Heading</h1>
+    <p>My first paragraph.</p>
+
+    <input type="text" id="inputText" placeholder="Enter some text" />
+
+    <!-- Button to trigger API call -->
+    <button id="apiButton_requestRecipeListFromIngredients">Ask For Recipe with eggs and cheese</button>
+    <button id="apiButton_requestRecipeBulkInformationFromID">Ask bulk info from ID</button>
+    <button id="apiButton_requestGlucosePrediction">Generate Glucose Prediction Graph</button>
+
+    <!-- Section to display the API response -->
+    <div id="apiResponse" style="margin-top: 20px;"></div>
+
+    <script>
+        // Add event listener for the button click
+        document.getElementById('apiButton_requestRecipeListFromIngredients').addEventListener('click', async () => {
+            // Get the value from the input box
+            const userInput = document.getElementById('inputText').value;
+
+            // Example API endpoint (replace with your own API URL)
+            const apiUrl = '/getRecipes';
+
+            _body = {
+                ingredients: ["eggs", "cheese", "rice"], count: 3
+            }
+
+            try {
+                // Make the API call with fetch
+                const response = await fetch(apiUrl, {
+                    method: 'POST', // Use GET if the API requires it
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(_body) // Adjust payload structure as needed
+                });
+
+                // Handle the response
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data)
+                    document.getElementById('apiResponse').innerHTML =
+                        `<strong>Response:</strong> ${data}`;
+                } else {
+                    const data = await response.json();
+                    document.getElementById('apiResponse').innerHTML =
+                        `<strong>Error:</strong> ${data.error} (${response.statusText})`;
+                }
+            } catch (error) {
+                document.getElementById('apiResponse').innerHTML =
+                    `<strong>Error:</strong> ${error.message}`;
+            }
+        });
+
+
+        document.getElementById('apiButton_requestRecipeBulkInformationFromID').addEventListener('click', async () => {
+            // Get the value from the input box
+            const userInput = document.getElementById('inputText').value;
+
+            // Example API endpoint (replace with your own API URL)
+            const apiUrl = '/getRecipeInformation';
+
+            _body = {
+                spoonRecipeID: 716429
+            }
+
+            try {
+                // Make the API call with fetch
+                const response = await fetch(apiUrl, {
+                    method: 'POST', // Use GET if the API requires it
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(_body) // Adjust payload structure as needed
+                });
+
+                // Handle the response
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data)
+                    document.getElementById('apiResponse').innerHTML =
+                        `<strong>Response:</strong> ${data}`;
+                } else {
+                    const data = await response.json();
+                    document.getElementById('apiResponse').innerHTML =
+                        `<strong>Error:</strong> ${data.error} (${response.statusText})`;
+                }
+            } catch (error) {
+                document.getElementById('apiResponse').innerHTML =
+                    `<strong>Error:</strong> ${error.message}`;
+            }
+        });
+
+        document.getElementById('apiButton_requestGlucosePrediction').addEventListener('click', async () => {
+            // Get the value from the input box
+            const userInput = document.getElementById('inputText').value;
+
+            // Example API endpoint (replace with your own API URL)
+            const apiUrl = '/getGlucosePrediction';
+
+            _body = {
+                insulin: 3.5,
+                carbs: 50
+            }
+
+            try {
+                // Make the API call with fetch
+                const response = await fetch(apiUrl, {
+                    method: 'POST', // Use POST if the API requires it
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(_body)
+                });
+
+                // Handle the response
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data)
+                    document.getElementById('apiResponse').innerHTML =
+                        `<strong>Response:</strong> ${data}`;
+                } else {
+                    const data = await response.json();
+                    document.getElementById('apiResponse').innerHTML =
+                        `<strong>Error:</strong> ${data.error} (${response.statusText})`;
+                }
+            } catch (error) {
+                document.getElementById('apiResponse').innerHTML =
+                    `<strong>Error:</strong> ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
