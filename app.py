@@ -6,7 +6,7 @@ from src.models.Spoonacular.RecipeProceedure import RecipeProceedure
 from src.commons.PlotlyGraphHelper import PlotlyGraphHelper
 from src.glucosePrediction.GlucosePredictor import GlucosePredictor
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 from http import HTTPStatus
 from dotenv import load_dotenv, set_key
 import os
@@ -21,6 +21,11 @@ app = Flask(__name__)
 #-   API ENDPOINTS   -#
 #---------------------#
 #region API_ENDPOINTS
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'templates/resources'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
 def index():
@@ -183,7 +188,7 @@ def getRecipeInformation():
         recipe = responsedata[0]
         recipe = RecipeProceedure.from_dict(recipe)
 
-        resp = jsonify(recipe=recipe.to_dict())
+        resp = jsonify(recipe.to_dict())
 
         return resp, HTTPStatus.OK
 

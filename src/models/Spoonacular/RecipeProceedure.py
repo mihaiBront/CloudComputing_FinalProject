@@ -46,5 +46,8 @@ class RecipeProceedure(Serializable):
             Nutrition=_nutrition,
             
             Summary=json_dict["summary"],
-            Instructions=[{step["step"], step["number"]} for step in _analyzedInstructions]
+            Instructions=[{
+                "step": step["step"], 
+                "number": step["number"]
+                } for step in _analyzedInstructions]
         )
