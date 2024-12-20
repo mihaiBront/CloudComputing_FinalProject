@@ -3,6 +3,7 @@ from unittest import TestCase
 from src.API_Interfaces.SpoonacularAPI_interface import SpoonacularAPI_interface
 from src.API_Interfaces.LibreViewAPI_interface import LibreViewAPI_interface
 from src.models.LibreView.OauthResponse import OauthResponse
+from src.models.Spoonacular.RecipeProceedure import RecipeProceedure
 from src.models.Spoonacular.Recipe import Recipe
 from src.models.LibreView.Glucose.GlucoseReadings import GlucoseReadings
 from src.commons.FileManagement import FileManagement
@@ -80,12 +81,24 @@ class spoonacularApiTests(TestCase):
     def test_getBulkGlycemicLoadFromIngredientsList(self):
         self.spoon = SpoonacularAPI_interface()
         try:
-            code, response = self.spoon.getBulkInformationFromRecipeId(716439)
+            code, response = self.spoon.getBulkInformationFromRecipeId(632955)
             self.assertEqual(code, 200)
             log.info(f"SUCCESS {response}")
         except Exception as e:
             log.error(e)
-            self.assertFalse(True, "Test failed")
+            self.assertFalse(True, "Test failed {e}")
+            
+        try:
+            recipeProceedure = RecipeProceedure.from_dict(response[0])
+            self.assertIsInstance(recipeProceedure, RecipeProceedure)
+
+            string = recipeProceedure.to_dict()
+            
+            log.info(f"SUCCESS {recipeProceedure}")
+        
+        except Exception as e:
+            log.error(e)
+            self.assertFalse(True, f"Test failed serializing /deserializing {e}")
 
 class libreViewApiTests(TestCase):
     def testConstruct(self):

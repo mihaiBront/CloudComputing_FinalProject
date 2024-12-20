@@ -188,7 +188,7 @@ def getRecipeInformation():
         recipe = responsedata[0]
         recipe = RecipeProceedure.from_dict(recipe)
 
-        resp = jsonify(recipe=recipe.to_dict())
+        resp = jsonify(recipe.to_dict())
 
         return resp, HTTPStatus.OK
 
