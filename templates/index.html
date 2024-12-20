@@ -168,6 +168,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@chartjs/chartjs-adapter-luxon"></script>
     <script>
         // Recipe and Chart Handling
         const generateRecipesBtn = document.getElementById("generateRecipesBtn");
@@ -188,7 +190,7 @@
         
                 const requestBody = {
                     ingredients: ingredients,
-                    count: 3
+                    count: 1
                 };
         
                 console.log(requestBody);
@@ -390,6 +392,7 @@
         }
 
         // Initialize chart with default values
+        // Initialize chart with default values
         updateChart(180); */
 
         async function updateChart(carbohydrates) {
@@ -407,32 +410,36 @@
                         carbs: carbInput
                     })
                 });
-        
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-        
+                
                 const data = await response.json();
                 
-                // Find the last point of historical data to start prediction
-                const lastHistoricalPoint = data.readings.glucose[data.readings.glucose.length - 1];
+                const allTimes = [...data.readings.time];
+                const glucoseData = [...data.readings.glucose];
                 
-                // Create prediction data starting from the last historical point
-                const predictionData = [lastHistoricalPoint, ...data.prediction.glucose];
-                const predictionLabels = [data.readings.time[data.readings.time.length - 1], ...data.prediction.time];
+                const predictionData = new Array(data.readings.glucose.length).fill(null);
+                
+                const lastHistoricalIndex = data.readings.glucose.length - 1;
+                predictionData[lastHistoricalIndex] = data.readings.glucose[lastHistoricalIndex];
+                
+                allTimes.push(...data.prediction.time);
+                predictionData.push(...data.prediction.glucose);
                 
                 if (glucoseChart) {
                     glucoseChart.destroy();
                 }
-        
+                
                 glucoseChart = new Chart(glucoseChartCanvas, {
                     type: "line",
                     data: {
-                        labels: data.readings.time,
+                        labels: allTimes,
                         datasets: [
                             {
                                 label: "Glucose Data",
-                                data: data.readings.glucose,
+                                data: glucoseData,
                                 borderColor: "rgba(63, 81, 181, 1)",
                                 backgroundColor: "rgba(63, 81, 181, 0.1)",
                                 borderWidth: 2,
@@ -442,13 +449,12 @@
                             {
                                 label: "Glucose Prediction",
                                 data: predictionData,
-                                labels: predictionLabels,
                                 borderColor: "rgba(244, 67, 54, 1)",
                                 backgroundColor: "rgba(244, 67, 54, 0.1)",
                                 borderWidth: 2,
                                 fill: false,
                                 pointRadius: 0,
-                                borderDash: [5, 5]
+                                spanGaps: true
                             }
                         ]
                     },
@@ -483,6 +489,7 @@
         
         // Add event listeners
         document.getElementById('insulinDoses').addEventListener('change', updateChart);
+
     </script>
 </body>
 
