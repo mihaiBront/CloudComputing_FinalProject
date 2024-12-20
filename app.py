@@ -261,7 +261,7 @@ def getGlucosePrediction():
     try:
         # get request data
         data = request.get_json()
-        
+            
         _insulin_input = float(data.get("insulin", 0))
         _carbs_input = float(data.get("carbs", 0))
         

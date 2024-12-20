@@ -133,10 +133,27 @@
             <div class="insulin-input">
                 <label for="insulinDoses">Insulin Doses:</label>
                 <select id="insulinDoses">
+                    <option value="0">0</option>
+                    <option value="0.5">0.5</option>
                     <option value="1">1</option>
+                    <option value="1.5">1.5</option>
                     <option value="2">2</option>
+                    <option value="2.5">2.5</option>
                     <option value="3">3</option>
+                    <option value="3.5">3.5</option>
                     <option value="4">4</option>
+                    <option value="4.5">4.5</option>
+                    <option value="5">5</option>
+                    <option value="5.5">5.5</option>
+                    <option value="6">6</option>
+                    <option value="6.5">6.5</option>
+                    <option value="7">7</option>
+                    <option value="7.5">7.5</option>
+                    <option value="8">8</option>
+                    <option value="8.5">8.5</option>
+                    <option value="9">9</option>
+                    <option value="9.5">9.5</option>
+                    <option value="10">10</option>
                 </select>
             </div>
 
@@ -156,7 +173,7 @@
         const recipeList = document.getElementById("recipeList");
         const glucoseChartCanvas = document.getElementById("glucoseChart");
         const recipeDetails = document.getElementById("recipeDetails");
-        const insulinDosesSelect = document.getElementById("insulinDoses");
+        const insulinDoses = document.getElementById("insulinDoses");
 
         let glucoseChart; // Chart instance
         let recipes = []; // Store API response recipes
@@ -167,14 +184,15 @@
         async function fetchRecipes(ingredients) {
             try {
                 const apiUrl = '/getRecipes';
-                
+        
                 const requestBody = {
                     ingredients: ingredients,
                     count: 3
                 };
-
+        
                 console.log(requestBody);
-
+        
+                // Fetch recipes
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -182,35 +200,86 @@
                     },
                     body: JSON.stringify(requestBody)
                 });
-
-
+        
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-
+        
                 const data = await response.json();
-                console.log('Received data:', data);
-                
-                // Map over the recipes array
-                return data.recipes.map(recipe => ({
-                    id: recipe.SpoonRecipeID || 'N/A',
-                    title: recipe.Title || 'N/A',
-                    image: recipe.Image || 'N/A',
-                    glycemicLoad: recipe.GlycemicLoad || 'N/A',
-                    // Extract ingredient names and join them into a string
-                    ingredients: recipe.Ingredients.map(ingredient => ingredient.Name).join(', ') || 'N/A'
-                }));
-                
-                
+                console.log('Received recipe data:', data);
+        
+                // Fetch nutritional information for each recipe
+                const recipesWithNutrition = await Promise.all(
+                    data.recipes.map(async (recipe) => {
+                        try {
+                            const apiUrlNutritional = '/getRecipeInformation';
+
+                            console.log(recipe);
+        
+                            const requestBodyNutritional = {
+                                spoonRecipeID: recipe.SpoonRecipeID
+                            };
+        
+                            const responseNutritional = await fetch(apiUrlNutritional, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(requestBodyNutritional)
+                            });
+
+                            console.log('Response Nutritional: ', responseNutritional);
+        
+                            if (!responseNutritional.ok) {
+                                throw new Error(`HTTP error! Status: ${responseNutritional.status}`);
+                            }
+        
+                            const dataNutritional = await responseNutritional.json();
+                            console.log(`Nutritional data for recipe ${recipe.SpoonRecipeID}:`, dataNutritional);
+        
+                            // Extract carbohydrates
+                            const carbos = dataNutritional.recipe.Nutrition?.find(nutrition => nutrition.name === 'Carbohydrates')?.amount || 0;
+        
+                            return {
+                                id: recipe.SpoonRecipeID || 'N/A',
+                                title: recipe.Title || 'N/A',
+                                image: recipe.Image || 'N/A',
+                                glycemicLoad: recipe.GlycemicLoad || 'N/A',
+                                carbohydrates: carbos,
+                                // Extract ingredient names and join them into a string
+                                ingredients: recipe.Ingredients.map(ingredient => ingredient.Name).join(', ') || 'N/A'
+                            };
+        
+                        } catch (error) {
+                            console.error(`Error fetching nutritional data for recipe ${recipe.SpoonRecipeID}:`, error);
+        
+                            // Return the recipe without nutritional data in case of error
+                            return {
+                                id: recipe.SpoonRecipeID || 'N/A',
+                                title: recipe.Title || 'N/A',
+                                image: recipe.Image || 'N/A',
+                                glycemicLoad: recipe.GlycemicLoad || 'N/A',
+                                carbohydrates: 0, // Fallback value for carbohydrates
+                                ingredients: recipe.Ingredients.map(ingredient => ingredient.Name).join(', ') || 'N/A'
+                            };
+                        }
+                    })
+                );
+        
+                return recipesWithNutrition;
+        
             } catch (error) {
                 console.error('Error fetching recipes:', error);
+        
+                // Return fallback data in case of error
                 return [
-                    { id: 1, ingredients: "Carrots, Rice", glycemicLoad: 180 },
-                    { id: 2, ingredients: "Bread, Eggs", glycemicLoad: 160 },
-                    { id: 3, ingredients: "Pasta, Cheese", glycemicLoad: 200 }
+                    { id: 1, title: "Fallback Recipe 1", ingredients: "Carrots, Rice", glycemicLoad: 180, carbohydrates: 0 },
+                    { id: 2, title: "Fallback Recipe 2", ingredients: "Bread, Eggs", glycemicLoad: 160, carbohydrates: 0 },
+                    { id: 3, title: "Fallback Recipe 3", ingredients: "Pasta, Cheese", glycemicLoad: 200, carbohydrates: 0 }
                 ];
             }
         }
+        
 
         // Event Listener: Generate Recipes
         generateRecipesBtn.addEventListener("click", async () => {
@@ -237,7 +306,8 @@
                         <strong>RECIPE ${index + 1}</strong><br>
                         Title: ${recipe.title}
                         Ingredients: ${recipe.ingredients}<br>
-                        Glycemic Load: ${recipe.glycemicLoad}
+                        Glycemic Load: ${recipe.glycemicLoad}<br>
+                        Carbohydrates: ${recipe.carbohydrates}<br>
                     `;
                     recipeItem.onclick = () => displayRecipeDetails(recipe, index, recipeItem);
                     recipeList.appendChild(recipeItem);
@@ -263,15 +333,15 @@
             `;
 
             // Update glucose chart
-            updateChart(recipe.glycemicLoad);
+            updateChart(recipe.carbohydrates);
         }
 
         // Update Chart with Glycemic Index
-        function updateChart(glycemicIndex) {
+        /* function updateChart(glycemicIndex) {
             
             const insulinDose = insulinDosesSelect.value;
 
-            /* const apiUrl = '/getGlucosePrediction';
+            const apiUrl = '/getGlucosePrediction';
                 
             const requestBody = {
             };
@@ -289,7 +359,7 @@
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
-            } */
+            }
 
             const data = Array.from({ length: 10 }, (_, i) => glycemicIndex / insulinDose * Math.exp(-i / 2));
 
@@ -318,7 +388,99 @@
         }
 
         // Initialize chart with default values
-        updateChart(180);
+        updateChart(180); */
+
+        async function updateChart(carbohydrates) {
+            try {
+                const insulinDose = parseFloat(insulinDoses.value) || 0;
+                const carbInput = parseFloat(carbohydrates) || 0;
+                
+                const response = await fetch('/getGlucosePrediction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        insulin: insulinDose,
+                        carbs: carbInput
+                    })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+        
+                const data = await response.json();
+                
+                // Find the last point of historical data to start prediction
+                const lastHistoricalPoint = data.readings.glucose[data.readings.glucose.length - 1];
+                
+                // Create prediction data starting from the last historical point
+                const predictionData = [lastHistoricalPoint, ...data.prediction.glucose];
+                const predictionLabels = [data.readings.time[data.readings.time.length - 1], ...data.prediction.time];
+                
+                if (glucoseChart) {
+                    glucoseChart.destroy();
+                }
+        
+                glucoseChart = new Chart(glucoseChartCanvas, {
+                    type: "line",
+                    data: {
+                        labels: data.readings.time,
+                        datasets: [
+                            {
+                                label: "Glucose Data",
+                                data: data.readings.glucose,
+                                borderColor: "rgba(63, 81, 181, 1)",
+                                backgroundColor: "rgba(63, 81, 181, 0.1)",
+                                borderWidth: 2,
+                                fill: false,
+                                pointRadius: 0
+                            },
+                            {
+                                label: "Glucose Prediction",
+                                data: predictionData,
+                                labels: predictionLabels,
+                                borderColor: "rgba(244, 67, 54, 1)",
+                                backgroundColor: "rgba(244, 67, 54, 0.1)",
+                                borderWidth: 2,
+                                fill: false,
+                                pointRadius: 0,
+                                borderDash: [5, 5]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                min: 50,
+                                max: 350,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating chart:', error);
+                alert('Failed to update glucose prediction. Please try again.');
+            }
+        }
+        
+        // Add event listeners
+        document.getElementById('insulinDoses').addEventListener('change', updateChart);
     </script>
 </body>
 
