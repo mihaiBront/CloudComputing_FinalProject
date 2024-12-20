@@ -25,6 +25,9 @@ class RecipeProceedure(Serializable):
     def from_dict(cls, json_dict:dict) -> 'RecipeProceedure':
         
         _nutrition=json_dict.get("nutrition", []).get("nutrients", [])
+        
+        _nut = {nut["name"]:nut["amount"] for nut in _nutrition}
+        
         _analyzedInstructions=json_dict.get("analyzedInstructions", [])
         if len(_analyzedInstructions) > 0:
             _analyzedInstructions = _analyzedInstructions[0].get("steps", [])
@@ -43,7 +46,7 @@ class RecipeProceedure(Serializable):
             CookingMinutes=json_dict["cookingMinutes"],
             ReadyInMinutes=json_dict["readyInMinutes"],
             
-            Nutrition=_nutrition,
+            Nutrition=_nut,
             
             Summary=json_dict["summary"],
             Instructions=[{

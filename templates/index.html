@@ -238,15 +238,16 @@
                             const dataNutritional = await responseNutritional.json();
                             console.log(`Nutritional data for recipe ${recipe.SpoonRecipeID}:`, dataNutritional);
         
+
                             // Extract carbohydrates
-                            const carbos = dataNutritional.recipe.Nutrition?.find(nutrition => nutrition.name === 'Carbohydrates')?.amount || 0;
+                            const carbs = dataNutritional.Nutrition.Carbohydrates + dataNutritional.Nutrition.Sugar;
         
                             return {
                                 id: recipe.SpoonRecipeID || 'N/A',
                                 title: recipe.Title || 'N/A',
                                 image: recipe.Image || 'N/A',
                                 glycemicLoad: recipe.GlycemicLoad || 'N/A',
-                                carbohydrates: carbos,
+                                carbohydrates: carbs,
                                 // Extract ingredient names and join them into a string
                                 ingredients: recipe.Ingredients.map(ingredient => ingredient.Name).join(', ') || 'N/A'
                             };
