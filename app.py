@@ -289,9 +289,9 @@ def getGlucosePrediction():
         # convert data to arrays
         for key, value in responsedata.items():
             responsedata[key] = list(value)
-        
+
         for key, value in prediction.items():
-            prediction[key] = list(value)
+            prediction[key] = list(value)[-6:]
         
         ret = {
             "readings": responsedata,

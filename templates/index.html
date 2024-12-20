@@ -418,6 +418,7 @@
                 const data = await response.json();
                 
                 const allTimes = [...data.readings.time];
+
                 const glucoseData = [...data.readings.glucose];
                 
                 const predictionData = new Array(data.readings.glucose.length).fill(null);
@@ -466,11 +467,19 @@
                                 max: 350,
                                 grid: {
                                     color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Glucose (mg/dl)'
                                 }
                             },
                             x: {
                                 grid: {
                                     color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Timestamp'
                                 }
                             }
                         },
