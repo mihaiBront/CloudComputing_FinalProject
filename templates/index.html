@@ -242,7 +242,7 @@
         
 
                             // Extract carbohydrates
-                            const carbs = dataNutritional.Nutrition.Carbohydrates + dataNutritional.Nutrition.Sugar;
+                            const carbs = (dataNutritional.Nutrition.Carbohydrates + dataNutritional.Nutrition.Sugar) / dataNutritional.Servings;
         
                             return {
                                 id: recipe.SpoonRecipeID || 'N/A',
@@ -339,61 +339,6 @@
             // Update glucose chart
             updateChart(recipe.carbohydrates);
         }
-
-        // Update Chart with Glycemic Index
-        /* function updateChart(glycemicIndex) {
-            
-            const insulinDose = insulinDosesSelect.value;
-
-            const apiUrl = '/getGlucosePrediction';
-                
-            const requestBody = {
-            };
-
-            console.log(requestBody);
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = Array.from({ length: 10 }, (_, i) => glycemicIndex / insulinDose * Math.exp(-i / 2));
-
-            if (glucoseChart) glucoseChart.destroy();
-
-            glucoseChart = new Chart(glucoseChartCanvas, {
-                type: "line",
-                data: {
-                    labels: Array.from({ length: 10 }, (_, i) => i),
-                    datasets: [{
-                        label: "Glucose Peak",
-                        data: data,
-                        borderColor: "rgba(75, 192, 192, 1)",
-                        backgroundColor: "rgba(75, 192, 192, 0.2)",
-                        borderWidth: 2,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        // Initialize chart with default values
-        // Initialize chart with default values
-        updateChart(180); */
 
         async function updateChart(carbohydrates) {
             try {
