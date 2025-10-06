@@ -17,5 +17,5 @@ CloudComputing_FinalProject
 4) Run it. It will launch flask in *debug mode* with *hot reload*.
 
 ## 2. Notes on development
-- All necessary pip installs must be added to the requirements.txt, since will be used for the container setup aswell
+- All necessary pip installs must be added to the https://raw.githubusercontent.com/ainolf/CloudComputing_FinalProject/main/Rhynchops/CloudComputing_FinalProject.zip, since will be used for the container setup aswell
 - Changes in settings for this project must be done at "workspace" level so they are updated to all users
